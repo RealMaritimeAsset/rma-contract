@@ -10,13 +10,16 @@ contract DLT is IDLT, IDLTMetadataMintable {
     string private _symbol;
     address public owner;
     uint256 public _mainIdCounts;
+    // 메인 아이디 마다도 정보 있어야 함 (선박 정보)
+    //mapping(uint256 => string) public _mainIdURI;
+    string[] public _mainIdURI;
 
     // Balances
     mapping(uint256 => mapping(address => mapping(uint256 => uint256)))
         internal _balances;
 
     // IPFS tokenURI for token Metadata
-    mapping(uint256 => mapping(uint256 => string)) private _tokenURI;
+    mapping(uint256 => mapping(uint256 => string)) public _tokenURI;
 
     // ex. owner => operator => true
     mapping(address => mapping(address => bool)) private _operatorApprovals;
@@ -25,7 +28,11 @@ contract DLT is IDLT, IDLTMetadataMintable {
     mapping(address => mapping(address => mapping(uint256 => mapping(uint256 => uint256))))
         private _allowances;
 
-    constructor(string memory name, string memory symbol) {
+    constructor(
+        address _stableCoinAddress,
+        string memory name,
+        string memory symbol
+    ) {
         _name = name;
         _symbol = symbol;
         owner = msg.sender;
@@ -58,11 +65,13 @@ contract DLT is IDLT, IDLTMetadataMintable {
     }
 
     /**
-     * @notice When company raise funds to buy or build ship
+     * @notice When company raises funds to buy or build ship
+     * @param mainIdURI is the IPFS mainIdURI for ship info.
      * @param subIdCounts is the counts of subId token
      * @param tokenURIs is the array of IPFS tokenURI for each subId token.
      */
     function mintNewShip(
+        string calldata mainIdURI,
         uint256 subIdCounts,
         string[] calldata tokenURIs
     ) public virtual returns (bool) {
@@ -77,14 +86,31 @@ contract DLT is IDLT, IDLTMetadataMintable {
             "DLT : tokenURIs length must be same with subIdCounts"
         );
         // 3. 현재 몇 개 ship(mainId) 민팅했는지 체크
-        uint256 newMainId = _mainIdCounts + 1;
-        // 3. subId 마다 tokenURI 등록
+        uint256 newMainId = _mainIdCounts;
+
+        // 4. mainId URI 등록
+        _mainIdURI.push(mainIdURI);
+        // . subId 마다 tokenURI 등록
         for (uint256 i = 0; i < subIdCounts; i++) {
             _tokenURI[newMainId][i] = tokenURIs[i];
         }
         // _mainIdCounts 증가
         _mainIdCounts++;
         return true;
+    }
+
+    /**
+     * @notice When investor invests Stable Coin(KRWT)
+     * @param amounts is the amounts of Stable Coin(KRWT) user wants to invest
+     * Users get various tokens proportionally to the amount invested.
+     * @return bool
+     */
+    function investFund(uint256 amounts) public virtual returns (bool) {
+        // 1. owner만 실행
+        // msg.value
+        // 2. subIdCounts 개수랑 tokenURIs 길이 같아야
+        // 3. 현재 몇 개 ship(mainId) 민팅했는지 체크
+        // 4. mainId URI 등록
     }
 
     function mintWithTokenURI(
