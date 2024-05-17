@@ -29,7 +29,7 @@ contract DLT is IDLT, IDLTMetadataMintable {
         private _allowances;
 
     constructor(
-        address _stableCoinAddress,
+        //address _stableCoinAddress,
         string memory name,
         string memory symbol
     ) {
@@ -112,6 +112,30 @@ contract DLT is IDLT, IDLTMetadataMintable {
         // 3. 현재 몇 개 ship(mainId) 민팅했는지 체크
         // 4. mainId URI 등록
     }
+
+    /**
+     * @notice When mainId's metadata is changed
+     * @param mainId is the main token type ID
+     * @param tokenURI is NEW IPFS URI for metadata of the token
+     * Users get various tokens proportionally to the amount invested.
+     * @return bool
+     */
+    function setMainTokenURI(
+        uint256 mainId,
+        string calldata tokenURI
+    ) public returns (bool) {}
+
+    /**
+     * @param mainId is the main token type ID
+     * @param subId is the token subtype ID which metadata changes
+     * @param tokenURI is NEW IPFS URI for metadata of the token
+     * @return boolean
+     */
+    function setSubTokenURI(
+        uint256 mainId,
+        uint256 subId,
+        string calldata tokenURI
+    ) public returns (bool) {}
 
     function mintWithTokenURI(
         address recipient,
