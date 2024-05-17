@@ -9,6 +9,7 @@ contract DLT is IDLT, IDLTMetadataMintable {
     string private _name;
     string private _symbol;
     address public owner;
+    uint256 public _mainIdCounts;
 
     // Balances
     mapping(uint256 => mapping(address => mapping(uint256 => uint256)))
@@ -54,6 +55,36 @@ contract DLT is IDLT, IDLTMetadataMintable {
         bool approved
     ) public virtual override {
         _setApprovalForAll(msg.sender, operator, approved);
+    }
+
+    /**
+     * @notice When company raise funds to buy or build ship
+     * @param subIdCounts is the counts of subId token
+     * @param tokenURIs is the array of IPFS tokenURI for each subId token.
+     */
+    function mintNewShip(
+        uint256 subIdCounts,
+        string[] calldata tokenURIs
+    ) public virtual returns (bool) {
+        // 1. owner만 실행
+        require(
+            owner == msg.sender,
+            "DLT : onlyOwner can call mintNewship function"
+        );
+        // 2. subIdCounts 개수랑 tokenURIs 길이 같아야
+        require(
+            subIdCounts == tokenURIs.length,
+            "DLT : tokenURIs length must be same with subIdCounts"
+        );
+        // 3. 현재 몇 개 ship(mainId) 민팅했는지 체크
+        uint256 newMainId = _mainIdCounts + 1;
+        // 3. subId 마다 tokenURI 등록
+        for (uint256 i = 0; i < subIdCounts; i++) {
+            _tokenURI[newMainId][i] = tokenURIs[i];
+        }
+        // _mainIdCounts 증가
+        _mainIdCounts++;
+        return true;
     }
 
     function mintWithTokenURI(
