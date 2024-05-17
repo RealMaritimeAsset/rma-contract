@@ -1,0 +1,1048 @@
+{
+	"compiler": {
+		"version": "0.8.20+commit.a1b79de6"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [
+					{
+						"internalType": "string",
+						"name": "name",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "symbol",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "version",
+						"type": "string"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "constructor"
+			},
+			{
+				"inputs": [],
+				"name": "ExpiredSignature",
+				"type": "error"
+			},
+			{
+				"inputs": [],
+				"name": "InvalidSignature",
+				"type": "error"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "s",
+						"type": "bytes32"
+					}
+				],
+				"name": "InvalidSignatureS",
+				"type": "error"
+			},
+			{
+				"inputs": [],
+				"name": "InvalidSigner",
+				"type": "error"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "owner",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "spender",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "mainId",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "subId",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
+				"name": "Approval",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "spender",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "operator",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "bool",
+						"name": "approved",
+						"type": "bool"
+					}
+				],
+				"name": "ApprovalForAll",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "sender",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "recipient",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "uint256",
+						"name": "mainId",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "subId",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
+				"name": "Transfer",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "spender",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "sender",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "recipient",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256[]",
+						"name": "mainIds",
+						"type": "uint256[]"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256[]",
+						"name": "subIds",
+						"type": "uint256[]"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256[]",
+						"name": "amounts",
+						"type": "uint256[]"
+					}
+				],
+				"name": "TransferBatch",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "string",
+						"name": "oldValue",
+						"type": "string"
+					},
+					{
+						"indexed": false,
+						"internalType": "string",
+						"name": "newValue",
+						"type": "string"
+					},
+					{
+						"indexed": true,
+						"internalType": "uint256",
+						"name": "mainId",
+						"type": "uint256"
+					}
+				],
+				"name": "URI",
+				"type": "event"
+			},
+			{
+				"inputs": [],
+				"name": "DOMAIN_SEPARATOR",
+				"outputs": [
+					{
+						"internalType": "bytes32",
+						"name": "",
+						"type": "bytes32"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "sender",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "recipient",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "mainId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "subId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
+				"name": "allow",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "owner",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "spender",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "mainId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "subId",
+						"type": "uint256"
+					}
+				],
+				"name": "allowance",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "spender",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "mainId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "subId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
+				"name": "approve",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address[]",
+						"name": "accounts",
+						"type": "address[]"
+					},
+					{
+						"internalType": "uint256[]",
+						"name": "mainIds",
+						"type": "uint256[]"
+					},
+					{
+						"internalType": "uint256[]",
+						"name": "subIds",
+						"type": "uint256[]"
+					}
+				],
+				"name": "balanceOfBatch",
+				"outputs": [
+					{
+						"internalType": "uint256[]",
+						"name": "",
+						"type": "uint256[]"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "account",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "mainId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "subId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
+				"name": "burn",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "mainId",
+						"type": "uint256"
+					}
+				],
+				"name": "getSubIds",
+				"outputs": [
+					{
+						"internalType": "uint256[]",
+						"name": "",
+						"type": "uint256[]"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "owner",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "operator",
+						"type": "address"
+					}
+				],
+				"name": "isApprovedForAll",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "account",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "mainId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "subId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
+				"name": "mint",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "owner",
+						"type": "address"
+					}
+				],
+				"name": "nonces",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "owner",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "spender",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "mainId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "subId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "deadline",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint8",
+						"name": "v",
+						"type": "uint8"
+					},
+					{
+						"internalType": "bytes32",
+						"name": "r",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "bytes32",
+						"name": "s",
+						"type": "bytes32"
+					}
+				],
+				"name": "permit",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "sender",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "recipient",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256[]",
+						"name": "mainIds",
+						"type": "uint256[]"
+					},
+					{
+						"internalType": "uint256[]",
+						"name": "subIds",
+						"type": "uint256[]"
+					},
+					{
+						"internalType": "uint256[]",
+						"name": "amounts",
+						"type": "uint256[]"
+					},
+					{
+						"internalType": "bytes",
+						"name": "data",
+						"type": "bytes"
+					}
+				],
+				"name": "safeBatchTransferFrom",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "sender",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "recipient",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "mainId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "subId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
+				"name": "safeTransferFrom",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "sender",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "recipient",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "mainId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "subId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					},
+					{
+						"internalType": "bytes",
+						"name": "dataextensions",
+						"type": "bytes"
+					}
+				],
+				"name": "safeTransferFrom",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "operator",
+						"type": "address"
+					},
+					{
+						"internalType": "bool",
+						"name": "approved",
+						"type": "bool"
+					}
+				],
+				"name": "setApprovalForAll",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "account",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "mainId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "subId",
+						"type": "uint256"
+					}
+				],
+				"name": "subBalanceOf",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "owner",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "mainId",
+						"type": "uint256"
+					}
+				],
+				"name": "subIdBalanceOf",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "totalBalance",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "totalMainIds",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "mainId",
+						"type": "uint256"
+					}
+				],
+				"name": "totalMainSupply",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "mainId",
+						"type": "uint256"
+					}
+				],
+				"name": "totalSubIds",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "mainId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "subId",
+						"type": "uint256"
+					}
+				],
+				"name": "totalSubSupply",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "sender",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "recipient",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "mainId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "subId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
+				"name": "transfer",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "sender",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "recipient",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "mainId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "subId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
+				"name": "transferFrom",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"events": {
+				"Approval(address,address,uint256,uint256,uint256)": {
+					"details": "Emitted when `owner` enables `spender` to manage the `subId` token."
+				},
+				"ApprovalForAll(address,address,bool)": {
+					"details": "Emitted when `spender` enables or disables (`approved`) `operator` to manage all of its assets."
+				},
+				"Transfer(address,address,uint256,uint256,uint256)": {
+					"details": "Emitted when `subId` token is transferred from `sender` to `recipient`."
+				}
+			},
+			"kind": "dev",
+			"methods": {
+				"DOMAIN_SEPARATOR()": {
+					"details": "See {IDLTPermit-DOMAIN_SEPARATOR}."
+				},
+				"allowance(address,address,uint256,uint256)": {
+					"details": "Returns the remaining number of tokens that `spender` will be allowed to spend on behalf of `owner` through {transferFrom}. This is zero by default. This value changes when {approve} or {transferFrom} are called."
+				},
+				"approve(address,uint256,uint256,uint256)": {
+					"details": "Sets `amount` as the allowance of `spender` over the caller's tokens. Returns a boolean value indicating whether the operation succeeded. Emits an {Approval} event."
+				},
+				"balanceOfBatch(address[],uint256[],uint256[])": {
+					"details": "See {IDLT-balanceOfBatch}. Requirements: - `accounts` and `mainIds` and `subIds` must have the same length."
+				},
+				"getSubIds(uint256)": {
+					"details": "See {IDLTEnumerable-getSubIds}."
+				},
+				"isApprovedForAll(address,address)": {
+					"details": "Returns if the `operator` is allowed to manage all of the assets of `owner`. See {setApprovalForAll}"
+				},
+				"nonces(address)": {
+					"details": "See {IDLTPermit-nonces}."
+				},
+				"permit(address,address,uint256,uint256,uint256,uint256,uint8,bytes32,bytes32)": {
+					"details": "See {IDLTPermit-permit}."
+				},
+				"safeTransferFrom(address,address,uint256,uint256,uint256)": {
+					"details": "See {IDLT-transferFrom}. NOTE: Does not update the allowance if the current allowance is the maximum `uint256`. Requirements: - `sender` and `recipient` cannot be the zero address. - `sender` must have a balance of at least `amount`. - the caller must have allowance for `sender`'s tokens of at least `amount`."
+				},
+				"setApprovalForAll(address,bool)": {
+					"details": "See {DLT-setApprovalForAll}."
+				},
+				"subBalanceOf(address,uint256,uint256)": {
+					"details": "Returns the amount of tokens owned by `account` in subId."
+				},
+				"subIdBalanceOf(address,uint256)": {
+					"details": "See {IDLTEnumerable-subIdBalanceOf}."
+				},
+				"totalMainIds()": {
+					"details": "See {IDLTEnumerable-totalMainIds}."
+				},
+				"totalMainSupply(uint256)": {
+					"details": "See {IDLTEnumerable-totalMainSupply}."
+				},
+				"totalSubIds(uint256)": {
+					"details": "See {IDLTEnumerable-totalSubIds}."
+				},
+				"totalSubSupply(uint256,uint256)": {
+					"details": "See {IDLTEnumerable-totalSubSupply}."
+				}
+			},
+			"version": 1
+		},
+		"userdoc": {
+			"events": {
+				"TransferBatch(address,address,address,uint256[],uint256[],uint256[])": {
+					"notice": "The `spender` argument of an account/contract that is approved to make the transfer (SHOULD be msg.sender). The `sender` argument of the holder whose balance is decreased. The `recipient` argument of the recipient whose balance is increased. The `mainIds` argument MUST be the list of mainIds being transferred. The `subIds` argument MUST be the list of subIds being transferred. The `amounts` argument MUST be the list of number of tokens When minting/creating tokens, the `sender` argument MUST be set to `0x0`. When burning/destroying tokens, the `recipient` argument MUST be set to `0x0`.                "
+				}
+			},
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"src/TestDLT.sol": "TestDLT"
+		},
+		"evmVersion": "shanghai",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"@openzeppelin/contracts/utils/Context.sol": {
+			"keccak256": "0x493033a8d1b176a037b2cc6a04dad01a5c157722049bbecf632ca876224dd4b2",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://6a708e8a5bdb1011c2c381c9a5cfd8a9a956d7d0a9dc1bd8bcdaf52f76ef2f12",
+				"dweb:/ipfs/Qmax9WHBnVsZP46ZxEMNRQpLQnrdE4dK8LehML1Py8FowF"
+			]
+		},
+		"src/DLT.sol": {
+			"keccak256": "0x1a49ee841d4774fc6c797beb3246dc4cd383f4f09145f3de0db0d35073389f69",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://784cdac964a88d7aea3d2030700c870d54d39fa16b48a1edb055ea0c4a6e74ae",
+				"dweb:/ipfs/QmdbUXm9z4vnPjyjdjtH2FP64bQnUoGzsCP36qDMVRy1zX"
+			]
+		},
+		"src/DLTEnumerable.sol": {
+			"keccak256": "0x9edc47907d7e8b9689ebb0302de94acc147dedae04bf385e9b0b1731830aff63",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://5e7011d0982600fb63942289aa0c7d5fec64a3d1246ac913083f4b34e8ca3ef8",
+				"dweb:/ipfs/QmSo6ARtCdpGsEPmFb5CFe51DWxSVtTswDbsQ8AwYwwm6V"
+			]
+		},
+		"src/DLTPermit.sol": {
+			"keccak256": "0x0f1ab6c0e84d21a844e615062d31f7143ba0745c0fd56b09bcb9b25bdd4e8126",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://0390ecd941a24323d28db789b4adea8095597c97f410440e0f99ddea6b557a29",
+				"dweb:/ipfs/QmR6R9sWVryEZqPdz5cVT4J6V9nbjmLjP43Lzr571C8pv3"
+			]
+		},
+		"src/TestDLT.sol": {
+			"keccak256": "0x28ad9dea08c5e4831199311d241388beaa5432a8047bb2e14014948c3adc8ba5",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://b538c18f4163a87c27175294d4a6dd0bd886ed47671b9e855cf420c3a0af7e87",
+				"dweb:/ipfs/QmYwt4ECZS4c3cbsqqhVCfkEHLSNyhbsATDMqLMas4CQxg"
+			]
+		},
+		"src/interfaces/IDLT.sol": {
+			"keccak256": "0xf84138bdd04ad5283510c071e45a0f6b004742fb3380fade335e5c19ac0bd133",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://a1058fc82608a0ce1d46d8e8469ef7c4837e90a28844a94ce77192b4d949880f",
+				"dweb:/ipfs/QmSPV4uFvqRbtydwwfTVYmd4cmHL4JwuhfxEeJiJGVAEcz"
+			]
+		},
+		"src/interfaces/IDLTEnumerable.sol": {
+			"keccak256": "0xe47914bc404bcf163b1f82ad40c9dddb1a5c61578904c3cfe59702bfd34416e3",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://429e9673f3f92df4431b0c23351e1613fdbd0a4ce35d0bc03ee950d4192f9e09",
+				"dweb:/ipfs/Qmai8uwir3XuFZ52prveehBRmR2Zc8E1LLq9yWetGxVbMT"
+			]
+		},
+		"src/interfaces/IDLTPermit.sol": {
+			"keccak256": "0x6189e3fec1c0b654885aa57c578e60fda31de4b1b95a599fad92b5bfac185851",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://f72e705e4ca26c7c888b0f8adf5c7ec9a6f591b00014f708978e9cc46329c229",
+				"dweb:/ipfs/QmNb6tpeHLpHJKx7Ed751TidNFQNc2cVbnKFis1KFENqrC"
+			]
+		},
+		"src/interfaces/IDLTReceiver.sol": {
+			"keccak256": "0x766fc18945501e0cbb24e8e5dbec46a7f6fa58f1474cf92f06c199306686254b",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://3f5eaa6b3228eef287df84f3ee2a5e10a43b952c500e66c54a57331000bf0d15",
+				"dweb:/ipfs/QmaenHtNKbjM9oXgQ9p9E2QByetXY48ANZxQUA6aJYrTYM"
+			]
+		}
+	},
+	"version": 1
+}
