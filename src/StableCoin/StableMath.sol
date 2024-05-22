@@ -47,9 +47,9 @@ contract StableMath {
         return liqudatePrice;
     }
 
-    function autoEthLiqudate() public payable returns (bool) {
+    function autoEthLiqudate(uint256 nowPrice) public payable returns (bool) {
         // 현재 가격 계산
-        uint256 ethUsdNow = ETHUSD;
+        uint256 ethUsdNow = nowPrice;
 
         // 전체 순회
         for (uint256 i = 0; i < ethMintedAddress.length; i++) {
@@ -59,7 +59,7 @@ contract StableMath {
 
                 //현재 가격으로 팔았다고 치고 차액만큼 돌려주기
                 uint256 valutEth = ethValut[user];
-                uint256 amountToMint = (valutEth * ETHUSD) / 1e18;
+                uint256 amountToMint = (valutEth * ethUsdNow) / 1e18;
                 uint256 nowCollateralPrice = amountToMint / 1e8;
                 uint256 goToUser = mintedStablecoins[user] - nowCollateralPrice;
 
@@ -71,11 +71,22 @@ contract StableMath {
             }
         }
 
-        // 청산가 보다 낮으면 청산
+        return true;
+    }
 
-        // 파는 대신 락을 걸고, 현재가격으로 팔았다고 치고 유저 금액을 빼서 차액 돌려주기
+    function redeemCollateral() public payable returns (bool) {
+        //
+        address user = msg.sender;
+        // 담보액 확인
+        uint256 valutAmount = ethValut[user];
 
-        // 알려주기
+        // ETH 주고
+        // stableCOin 받고
+
+        // 데이터 변환
+        ethValut[user] = 0;
+        ethLiqudatePrice[user] = 0;
+        mintedStablecoins[user] = 0;
 
         return true;
     }
