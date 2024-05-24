@@ -5,7 +5,6 @@ import {AggregatorV3Interface} from "@chainlink/contracts@1.1.0/src/v0.8/shared/
 import "@openzeppelin/contracts@5.0.2/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts@5.0.2/access/Ownable.sol";
 import "@openzeppelin/contracts@5.0.2/token/ERC20/extensions/ERC20Permit.sol";
-import {KeeperCompatibleInterface} from "@chainlink/contracts/src/v0.8/interfaces/KeeperCompatibleInterface.sol";
 
 /**
  * THIS IS AN EXAMPLE CONTRACT THAT USES HARDCODED
@@ -23,7 +22,7 @@ import {KeeperCompatibleInterface} from "@chainlink/contracts/src/v0.8/interface
  * page for details.
  */
 
-contract StableCoin is ERC20, Ownable, ERC20Permit, KeeperCompatibleInterface {
+contract StableCoin is ERC20, Ownable, ERC20Permit {
     AggregatorV3Interface internal dataFeed;
     mapping(address => uint256) public _ethValut;
     mapping(address => uint256) public _linkValut;
@@ -108,25 +107,5 @@ contract StableCoin is ERC20, Ownable, ERC20Permit, KeeperCompatibleInterface {
         address account
     ) public view returns (uint256) {
         return _linkValut[account];
-    }
-
-    function checkUpkeep(
-        bytes memory /* checkData */
-    )
-        public
-        view
-        override
-        returns (bool upkeepNeeded, bytes memory performData)
-    {
-        upkeepNeeded = (block.timestamp - lastTimeStamp) > interval;
-        performData = bytes("");
-    }
-
-    function performUpkeep(bytes calldata /* performData */) external override {
-        // add some verification
-        (bool upkeepNeeded, ) = checkUpkeep("");
-        require(upkeepNeeded, "Time interval not met");
-
-        lastTimeStamp = block.timestamp;
     }
 }
