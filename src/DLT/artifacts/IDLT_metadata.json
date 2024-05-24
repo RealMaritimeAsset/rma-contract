@@ -1,0 +1,563 @@
+{
+	"compiler": {
+		"version": "0.8.19+commit.7dd6d404"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "owner",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "operator",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "mainId",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "subId",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
+				"name": "Approval",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "owner",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "operator",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "bool",
+						"name": "approved",
+						"type": "bool"
+					}
+				],
+				"name": "ApprovalForAll",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "sender",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "recipient",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "uint256",
+						"name": "mainId",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "subId",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
+				"name": "Transfer",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "spender",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "sender",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "recipient",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256[]",
+						"name": "mainIds",
+						"type": "uint256[]"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256[]",
+						"name": "subIds",
+						"type": "uint256[]"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256[]",
+						"name": "amounts",
+						"type": "uint256[]"
+					}
+				],
+				"name": "TransferBatch",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "string",
+						"name": "oldValue",
+						"type": "string"
+					},
+					{
+						"indexed": false,
+						"internalType": "string",
+						"name": "newValue",
+						"type": "string"
+					},
+					{
+						"indexed": true,
+						"internalType": "uint256",
+						"name": "mainId",
+						"type": "uint256"
+					}
+				],
+				"name": "URI",
+				"type": "event"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "operator",
+						"type": "address"
+					},
+					{
+						"internalType": "bool",
+						"name": "approved",
+						"type": "bool"
+					}
+				],
+				"name": "SetApprovalForAll",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "owner",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "operator",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "mainId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "subId",
+						"type": "uint256"
+					}
+				],
+				"name": "allowance",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "operator",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "mainId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "subId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
+				"name": "approve",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address[]",
+						"name": "accounts",
+						"type": "address[]"
+					},
+					{
+						"internalType": "uint256[]",
+						"name": "mainIds",
+						"type": "uint256[]"
+					},
+					{
+						"internalType": "uint256[]",
+						"name": "subIds",
+						"type": "uint256[]"
+					}
+				],
+				"name": "balanceOfBatch",
+				"outputs": [
+					{
+						"internalType": "uint256[]",
+						"name": "",
+						"type": "uint256[]"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "owner",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "operator",
+						"type": "address"
+					}
+				],
+				"name": "isApprovedForAll",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "sender",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "recipient",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "mainId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "subId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					},
+					{
+						"internalType": "bytes",
+						"name": "data",
+						"type": "bytes"
+					}
+				],
+				"name": "safeTransferFrom",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "account",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "mainId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "subId",
+						"type": "uint256"
+					}
+				],
+				"name": "subBalanceOf",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"details": "Interface for any contract that wants to implement the DLT standard",
+			"events": {
+				"Approval(address,address,uint256,uint256,uint256)": {
+					"details": "Must emit when owner enables operator to mange the 'subId' token",
+					"params": {
+						"amount": "is the amount to be approved of the token subtype",
+						"mainId": "is the main token type ID to be approved",
+						"operator": "is the authorized address to manage all tokens for owner",
+						"owner": "is the address of token owner",
+						"subId": "is the token subtype ID"
+					}
+				},
+				"ApprovalForAll(address,address,bool)": {
+					"details": "Must emit when owner enables or disables 'operator' to manage all of its assets",
+					"params": {
+						"approved": "true if the operator is approved, false to revoke approval",
+						"operator": "is the authorized address to manage all tokens for owner",
+						"owner": "is the address of token owner"
+					}
+				},
+				"Transfer(address,address,uint256,uint256,uint256)": {
+					"details": "Must emit when subId token is transffered form 'sender' to 'recipient'",
+					"params": {
+						"amount": "is the amount to be transferred of the token subtype",
+						"mainId": "is the main token type ID to be transffered",
+						"recipient": "is the address of new holder whose bal is inc",
+						"sender": "is the address of previous holder whose balance is decre",
+						"subId": "is the token subtype ID to be transffered"
+					}
+				},
+				"TransferBatch(address,address,address,uint256[],uint256[],uint256[])": {
+					"details": "Must emit when 'subIds' token array is transferred from 'sender' to 'recipient'",
+					"params": {
+						"amounts": "is the amount array to be transferred of the token subtype",
+						"mainIds": "is the main token type ID array to be transferred",
+						"recipient": "is the address of new holder",
+						"sender": "is the address of previous holder",
+						"subIds": "is the token subtype ID array to be transferred"
+					}
+				},
+				"URI(string,string,uint256)": {
+					"details": "Must emit when the URI is updated for a main token type ID URIs are defined in RFC 3986. The URI MUST point to a JSON file that conforms to the \"DLT Metadata URI JSON Schema\".",
+					"params": {
+						"mainId": "is the main token type ID",
+						"newValue": "is the old URI value",
+						"oldValue": "is the old URI value"
+					}
+				}
+			},
+			"kind": "dev",
+			"methods": {
+				"SetApprovalForAll(address,bool)": {
+					"details": "Approve or remove 'operator' as an operator for the caller. Operators can call {transferFrom} or {safeTransferFrom} for any SubId owned by the caller. The 'operator' MUST NOT be the caller. MUST emit an {ApprovalForAll} event.",
+					"params": {
+						"approved": "true if the operator is approved, false to revoke approval",
+						"operator": "is the authorized address to manage all tokens"
+					}
+				},
+				"allowance(address,address,uint256,uint256)": {
+					"details": "This value changes when {approve} or {transferFrom} are called",
+					"params": {
+						"mainId": "is the main token type ID",
+						"operator": "is the authorized address to manage assets for an owner address",
+						"owner": "is the address of the token owner",
+						"subId": "is the token subtype ID"
+					},
+					"returns": {
+						"_0": "The remaining number of tokens that `operator` will be allowed to spend on behalf of `owner` through {transferFrom}. This is zero by default."
+					}
+				},
+				"approve(address,uint256,uint256,uint256)": {
+					"details": "Sets 'amount' as the allownace of 'spender' over the caller's tokens. The 'operator' MUST NOT be the caller. MUST revert if 'operator' is the zero addr. MUST emit an {Approval} event.",
+					"params": {
+						"amount": "is the amount to be approved of the token subtype",
+						"mainId": "is the main token type ID to be approved",
+						"operator": "is the authorized address to manage tokens for an owner address",
+						"subId": "is the token subtype ID to be approved"
+					},
+					"returns": {
+						"_0": "True if the operation succeeded, false if operation failed"
+					}
+				},
+				"balanceOfBatch(address[],uint256[],uint256[])": {
+					"params": {
+						"accounts": "is the address array of the token holder",
+						"mainIds": "is the main token type ID array",
+						"subIds": "is the token subtype ID array"
+					},
+					"returns": {
+						"_0": "The amount of tokens owned by `accounts` in subIds"
+					}
+				},
+				"isApprovedForAll(address,address)": {
+					"params": {
+						"operator": "is the authorized address to manage assets for an owner address",
+						"owner": "is the address of the token owner"
+					},
+					"returns": {
+						"_0": "True if the 'operator' is allowed to manage all of the assets of 'owner', false if approval is revoekd. See {setApprovalForAll}"
+					}
+				},
+				"safeTransferFrom(address,address,uint256,uint256,uint256,bytes)": {
+					"details": "Moves 'amount' tokens form 'sender' to 'recipient' using the allowance mechanism. amount is then deducted from callers allowance. MUST revert if 'sender' or 'recipient' is zero addr. MUST revert if balance of holder for token 'subId' is lower than 'amount' MUST emit a {Transfer} event.",
+					"params": {
+						"amount": "is the amount to be transferred of the token subtype",
+						"data": "is additional data with no specified format",
+						"mainId": "is the main token type ID to be transferred",
+						"recipient": "is the address of the new holder whose balance is increased",
+						"sender": "is the address of the previous holder whose balance is decreased",
+						"subId": "is the token subtype ID to be transferred"
+					},
+					"returns": {
+						"_0": "True if the operation succeeded, false if operation failed."
+					}
+				},
+				"subBalanceOf(address,uint256,uint256)": {
+					"params": {
+						"account": "is the address of the token holder",
+						"mainId": "is the main token type ID",
+						"subId": "is the token subtype ID"
+					},
+					"returns": {
+						"_0": "The amount of tokens owned by `account` in subId"
+					}
+				}
+			},
+			"title": "DLT token standard interface",
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {
+				"allowance(address,address,uint256,uint256)": {
+					"notice": "Get the allowance allocated to an 'operator'"
+				},
+				"balanceOfBatch(address[],uint256[],uint256[])": {
+					"notice": "Get the tokens with a particular subIds balance of an 'accounts' array"
+				},
+				"isApprovedForAll(address,address)": {
+					"notice": "Get the approval status of an 'operator' to manage assets"
+				},
+				"subBalanceOf(address,uint256,uint256)": {
+					"notice": "Get the token with a particular subId balance of an 'account'"
+				}
+			},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"src/DLT/IDLT.sol": "IDLT"
+		},
+		"evmVersion": "paris",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"src/DLT/IDLT.sol": {
+			"keccak256": "0x29e1bedb823c0118e207f7c1525288291657cb782e1070c97e90e9263029d2ee",
+			"license": "CC0-1.0",
+			"urls": [
+				"bzz-raw://d121f5a51bc6294903d36d57459d8bf192a036926e29cf06a43a73aeaa0e649c",
+				"dweb:/ipfs/QmX41ze5ZZ3uTx5ycGPcMyeNQaHZA3ooFvYPzghJwwmwxm"
+			]
+		}
+	},
+	"version": 1
+}
