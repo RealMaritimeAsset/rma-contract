@@ -6,8 +6,11 @@ import {IDLTReceiver} from "./IDLTReceiver.sol";
 import {IDLTMetadataMintable} from "./IDLTMetadataMintable.sol";
 
 contract DLT is IDLT, IDLTMetadataMintable {
+    //이름 
     string private _name;
+    //심볼 
     string private _symbol;
+    //오너
     address public owner;
 
     // Balances
@@ -69,7 +72,7 @@ contract DLT is IDLT, IDLTMetadataMintable {
         // 1. mint전에 미리 체크, mainId, subId 겹치지 않는지
         _balances[mainId][recipient][subId] += amounts;
         // 2. 이게 맞냐? 이러면 똑같은 토큰 발급하는데 매번 반복해야돼? 맨 처음에 하면 되잖아.
-        // _tokenURI[mainId][subId] = tokenURI;
+        _tokenURI[mainId][subId] = tokenURI;
 
         return true;
     }
@@ -139,6 +142,7 @@ contract DLT is IDLT, IDLTMetadataMintable {
     ) public view virtual override returns (uint256) {
         return _balances[mainId][account][subId];
     }
+
 
     function balanceOfBatch(
         address[] calldata accounts,
@@ -520,5 +524,10 @@ contract DLT is IDLT, IDLTMetadataMintable {
         } else {
             return true;
         }
+    }
+
+    // Function to return the token URI for a given mainId and subId
+    function tokenURI(uint256 mainId, uint256 subId) public view returns (string memory) {
+        return _tokenURI[mainId][subId];
     }
 }
