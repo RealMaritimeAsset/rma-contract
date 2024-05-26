@@ -207,6 +207,62 @@
 				"type": "function"
 			},
 			{
+				"inputs": [],
+				"name": "_mainIdCounts",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"name": "_mainIdURI",
+				"outputs": [
+					{
+						"internalType": "string",
+						"name": "",
+						"type": "string"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"name": "_tokenURI",
+				"outputs": [
+					{
+						"internalType": "string",
+						"name": "",
+						"type": "string"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
 				"inputs": [
 					{
 						"internalType": "address",
@@ -306,6 +362,25 @@
 			{
 				"inputs": [
 					{
+						"internalType": "uint256",
+						"name": "amounts",
+						"type": "uint256"
+					}
+				],
+				"name": "investFund",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
 						"internalType": "address",
 						"name": "owner",
 						"type": "address"
@@ -325,6 +400,35 @@
 					}
 				],
 				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "string",
+						"name": "mainIdURI",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "subIdCounts",
+						"type": "uint256"
+					},
+					{
+						"internalType": "string[]",
+						"name": "tokenURIs",
+						"type": "string[]"
+					}
+				],
+				"name": "mintNewShip",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "nonpayable",
 				"type": "function"
 			},
 			{
@@ -509,6 +613,59 @@
 			{
 				"inputs": [
 					{
+						"internalType": "uint256",
+						"name": "mainId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "string",
+						"name": "tokenURI",
+						"type": "string"
+					}
+				],
+				"name": "setMainTokenURI",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "mainId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "subId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "string",
+						"name": "tokenURI",
+						"type": "string"
+					}
+				],
+				"name": "setSubTokenURI",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
 						"internalType": "address",
 						"name": "account",
 						"type": "address"
@@ -530,6 +687,30 @@
 						"internalType": "uint256",
 						"name": "",
 						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "mainId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "subId",
+						"type": "uint256"
+					}
+				],
+				"name": "tokenURI",
+				"outputs": [
+					{
+						"internalType": "string",
+						"name": "",
+						"type": "string"
 					}
 				],
 				"stateMutability": "view",
@@ -655,6 +836,14 @@
 						"_0": "The amount of tokens owned by `accounts` in subIds"
 					}
 				},
+				"investFund(uint256)": {
+					"params": {
+						"amounts": "is the amounts of Stable Coin(KRWT) user wants to invest Users get various tokens proportionally to the amount invested."
+					},
+					"returns": {
+						"_0": "bool"
+					}
+				},
 				"isApprovedForAll(address,address)": {
 					"params": {
 						"operator": "is the authorized address to manage assets for an owner address",
@@ -662,6 +851,13 @@
 					},
 					"returns": {
 						"_0": "True if the 'operator' is allowed to manage all of the assets of 'owner', false if approval is revoekd. See {setApprovalForAll}"
+					}
+				},
+				"mintNewShip(string,uint256,string[])": {
+					"params": {
+						"mainIdURI": "is the IPFS mainIdURI for ship info.",
+						"subIdCounts": "is the counts of subId token",
+						"tokenURIs": "is the array of IPFS tokenURI for each subId token."
 					}
 				},
 				"mintWithTokenURI(address,uint256,uint256,uint256,string)": {
@@ -691,6 +887,25 @@
 						"_0": "True if the operation succeeded, false if operation failed."
 					}
 				},
+				"setMainTokenURI(uint256,string)": {
+					"params": {
+						"mainId": "is the main token type ID",
+						"tokenURI": "is NEW IPFS URI for metadata of the token Users get various tokens proportionally to the amount invested."
+					},
+					"returns": {
+						"_0": "bool"
+					}
+				},
+				"setSubTokenURI(uint256,uint256,string)": {
+					"params": {
+						"mainId": "is the main token type ID",
+						"subId": "is the token subtype ID which metadata changes",
+						"tokenURI": "is NEW IPFS URI for metadata of the token"
+					},
+					"returns": {
+						"_0": "boolean"
+					}
+				},
 				"subBalanceOf(address,uint256,uint256)": {
 					"params": {
 						"account": "is the address of the token holder",
@@ -710,11 +925,20 @@
 				"balanceOfBatch(address[],uint256[],uint256[])": {
 					"notice": "Get the tokens with a particular subIds balance of an 'accounts' array"
 				},
+				"investFund(uint256)": {
+					"notice": "When investor invests Stable Coin(KRWT)"
+				},
 				"isApprovedForAll(address,address)": {
 					"notice": "Get the approval status of an 'operator' to manage assets"
 				},
+				"mintNewShip(string,uint256,string[])": {
+					"notice": "When company raises funds to buy or build ship"
+				},
 				"mintWithTokenURI(address,uint256,uint256,uint256,string)": {
 					"notice": "Handle the mint of token with metadata"
+				},
+				"setMainTokenURI(uint256,string)": {
+					"notice": "When mainId's metadata is changed"
 				},
 				"subBalanceOf(address,uint256,uint256)": {
 					"notice": "Get the token with a particular subId balance of an 'account'"
@@ -736,15 +960,21 @@
 			"enabled": false,
 			"runs": 200
 		},
-		"remappings": []
+		"remappings": [
+			":@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+			":ds-test/=lib/openzeppelin-contracts/lib/forge-std/lib/ds-test/src/",
+			":erc4626-tests/=lib/openzeppelin-contracts/lib/erc4626-tests/",
+			":forge-std/=lib/forge-std/src/",
+			":openzeppelin-contracts/=lib/openzeppelin-contracts/"
+		]
 	},
 	"sources": {
 		"src/DLT/DLT.sol": {
-			"keccak256": "0x7d632244a94040183ebfeb0cb22d27596901c7c527c4a7df62f4766a07795bd0",
+			"keccak256": "0xfb2b0640c145745790e65d96418698fe59d0ea9d6dbf5bb886183c3b2468cb45",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://3183fba05df0c28143ce772fcb94768abc03e972bed19c919b8937d8fcdb8240",
-				"dweb:/ipfs/QmRHNYSdVmnGApxYamNC5KjJ9q2e97rMgoZkPC88qXE7nP"
+				"bzz-raw://af7297e7234a8167acb459c289b900d1821368e4b6ff120a82b187178f599697",
+				"dweb:/ipfs/QmTEvfTgeNathnBvYwsLnJVzNvMVfn8KA9z6U2UZQPEXWm"
 			]
 		},
 		"src/DLT/IDLT.sol": {
@@ -756,11 +986,11 @@
 			]
 		},
 		"src/DLT/IDLTMetadataMintable.sol": {
-			"keccak256": "0x89d7539dfa42708b855b72814e51e2dcbd1f39d6c1d86e465b70e551bca5ed85",
+			"keccak256": "0x98e06a4806cab12a45d38aed807be5d5b25cfd82d4dab6b25b7404aede2f34f4",
 			"license": "RMA",
 			"urls": [
-				"bzz-raw://9f264960e426b954196889103cf9fdea3a37fa1933ac0cd21a3f655a946f2c6e",
-				"dweb:/ipfs/QmZ24cx6sYeU1kyTHqgLCmP2JVLa7r1ryP5JHbKV3d5zH8"
+				"bzz-raw://e507e205106602501af9f74c6ae510e04a086da66bf61e5d1d5856ea93c0129d",
+				"dweb:/ipfs/QmWF9NxCAKfiJVN9mFBtPLusLaKSX5okeYwiBHSyf685Jf"
 			]
 		},
 		"src/DLT/IDLTReceiver.sol": {

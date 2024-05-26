@@ -12,3 +12,7 @@ docs/
 
 # Dotenv file
 .env
+
+src/DLT/artifacts/*
+.states/* 
+.deps/*
