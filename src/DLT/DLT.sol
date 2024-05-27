@@ -6,18 +6,20 @@ import {IDLTReceiver} from "./IDLTReceiver.sol";
 import {IDLTMetadataMintable} from "./IDLTMetadataMintable.sol";
 
 contract DLT is IDLT, IDLTMetadataMintable {
-    //이름 
+    // Company name
     string private _name;
-    //심볼 
+    // Company symbol
     string private _symbol;
-    //오너
+    // Company address
     address public owner;
+    // RMA admin address
+    address public admin;
 
-    // Balances
+    // Balances of subTokens
     mapping(uint256 => mapping(address => mapping(uint256 => uint256)))
         internal _balances;
 
-    // IPFS tokenURI for token Metadata
+    // IPFS tokenURI for subToken
     mapping(uint256 => mapping(uint256 => string)) private _tokenURI;
 
     // ex. owner => operator => true
@@ -27,15 +29,29 @@ contract DLT is IDLT, IDLTMetadataMintable {
     mapping(address => mapping(address => mapping(uint256 => mapping(uint256 => uint256))))
         private _allowances;
 
-    constructor(string memory name, string memory symbol) {
+    constructor(string memory name, string memory symbol, address _admin) {
         _name = name;
         _symbol = symbol;
         owner = msg.sender;
+        admin = _admin;
     }
 
     // Modifiers
     modifier onlyOwner() {
-        require(owner == msg.sender, "Caller is not the Owner.");
+        require(owner == msg.sender, "DLT : Caller is not the Owner.");
+        _;
+    }
+
+    modifier onlyAdmin() {
+        require(admin == msg.sender, "DLT : Caller is not the Admin.");
+        _;
+    }
+
+    modifier onlyOwnerOrAdmin() {
+        require(
+            (admin == msg.sender || owner == msg.sender),
+            "DLT : Caller is not the Admin or Owner."
+        );
         _;
     }
 
@@ -46,9 +62,9 @@ contract DLT is IDLT, IDLTMetadataMintable {
         uint256 mainId,
         uint256 subId,
         uint256 amount
-    ) public onlyOwner returns (bool) {
-        address owner = msg.sender;
-        _approve(owner, operator, mainId, subId, amount);
+    ) public returns (bool) {
+        address investor = msg.sender;
+        _approve(investor, operator, mainId, subId, amount);
         return true;
     }
 
@@ -62,18 +78,23 @@ contract DLT is IDLT, IDLTMetadataMintable {
     function mintWithTokenURI(
         address recipient,
         uint256 mainId,
-        uint256 subId,
-        uint256 amounts,
-        string calldata tokenURI
-    ) public virtual returns (bool) {
-        require(owner == msg.sender, "DLT : onlyOwner can mint new tokens.");
+        uint256 subIdAmounts,
+        uint256 tokenAmounts,
+        string[] calldata tokenURIs
+    ) public virtual onlyOwner returns (bool) {
         require(recipient != address(0), "DLT : mint to the zero address");
+        require(
+            subIdAmounts == tokenURIs.length,
+            "DLT : tokenURIs length mismatch with subIdAmounts."
+        );
 
-        // 1. mint전에 미리 체크, mainId, subId 겹치지 않는지
-        _balances[mainId][recipient][subId] += amounts;
-        // 2. 이게 맞냐? 이러면 똑같은 토큰 발급하는데 매번 반복해야돼? 맨 처음에 하면 되잖아.
-        _tokenURI[mainId][subId] = tokenURI;
-
+        //
+        for (uint256 i = 0; i < subIdAmounts; i++) {
+            _tokenURI[mainId][i] = tokenURIs[i];
+            _balances[mainId][recipient][i] = tokenAmounts;
+            _approve(msg.sender, admin, mainId, i, tokenAmounts);
+            _setApprovalForAll(owner, admin, true);
+        }
         return true;
     }
 
@@ -135,6 +156,8 @@ contract DLT is IDLT, IDLTMetadataMintable {
         return true;
     }
 
+    // View/Pure Functions
+
     function subBalanceOf(
         address account,
         uint256 mainId,
@@ -142,7 +165,6 @@ contract DLT is IDLT, IDLTMetadataMintable {
     ) public view virtual override returns (uint256) {
         return _balances[mainId][account][subId];
     }
-
 
     function balanceOfBatch(
         address[] calldata accounts,
@@ -173,12 +195,22 @@ contract DLT is IDLT, IDLTMetadataMintable {
         return _allowance(owner, spender, mainId, subId);
     }
 
+    // Function to return the token URI for a given mainId and subId
+    function tokenURI(
+        uint256 mainId,
+        uint256 subId
+    ) public view returns (string memory) {
+        return _tokenURI[mainId][subId];
+    }
+
     function isApprovedForAll(
         address owner,
         address operator
     ) public view virtual override returns (bool) {
         return _operatorApprovals[owner][operator];
     }
+
+    // Internal Functions
 
     function _safeMint(
         address recipient,
@@ -341,8 +373,12 @@ contract DLT is IDLT, IDLTMetadataMintable {
     ) internal virtual {
         require(owner != address(0), "DLT : approve from the zero address");
         require(spender != address(0), "DLT : approve from the zero address");
+        require(
+            _balances[mainId][owner][subId] > 0,
+            "DLT : You don't own any tokens."
+        );
 
-        _allowances[owner][spender][mainId][subId] = amount;
+        _allowances[owner][spender][mainId][subId] += amount;
         emit Approval(owner, spender, mainId, subId, amount);
     }
 
@@ -458,6 +494,7 @@ contract DLT is IDLT, IDLTMetadataMintable {
         return (sender == spender || isApprovedForAll(sender, spender));
     }
 
+    // Private Functions
     function _checkOnDLTReceived(
         address sender,
         address recipient,
@@ -524,10 +561,5 @@ contract DLT is IDLT, IDLTMetadataMintable {
         } else {
             return true;
         }
-    }
-
-    // Function to return the token URI for a given mainId and subId
-    function tokenURI(uint256 mainId, uint256 subId) public view returns (string memory) {
-        return _tokenURI[mainId][subId];
     }
 }

@@ -15,16 +15,16 @@ interface IDLTMetadataMintable {
      * MUST check if `mainId` or `subId` is already used before mint.
      * @param recipient is the address which is address of the token.
      * @param mainId is the main token type ID being minted
-     * @param subId is the token subtype ID being minted
-     * @param amounts is the amounts of token being minted
-     * @param tokenURI is IPFS URI for metadata of the token
+     * @param subIdAmounts are sub token type amounts.
+     * @param tokenAmounts are the amounts of sub token being minted
+     * @param tokenURIs are IPFS URI for metadata of the token
      * @return boolean
      */
     function mintWithTokenURI(
         address recipient,
         uint256 mainId,
-        uint256 subId,
-        uint256 amounts,
-        string calldata tokenURI
+        uint256 subIdAmounts,
+        uint256 tokenAmounts,
+        string[] calldata tokenURIs
     ) external returns (bool);
 }
