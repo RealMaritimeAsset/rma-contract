@@ -4,6 +4,7 @@ pragma solidity 0.8.19;
 import {IDLT} from "./IDLT.sol";
 import {IDLTReceiver} from "./IDLTReceiver.sol";
 import {IDLTMetadataMintable} from "./IDLTMetadataMintable.sol";
+import "./IERC20.sol";
 
 contract DLT is IDLT, IDLTMetadataMintable {
     // Company name
@@ -14,6 +15,11 @@ contract DLT is IDLT, IDLTMetadataMintable {
     address public owner;
     // RMA admin address
     address public admin;
+    // Stablecoin Interface;
+    IERC20 public stablecoin;
+
+    // Total Supply of subId token
+    mapping(uint256 => uint256) public _totalSupply;
 
     // Balances of subTokens
     mapping(uint256 => mapping(address => mapping(uint256 => uint256)))
@@ -29,11 +35,26 @@ contract DLT is IDLT, IDLTMetadataMintable {
     mapping(address => mapping(address => mapping(uint256 => mapping(uint256 => uint256))))
         private _allowances;
 
-    constructor(string memory name, string memory symbol, address _admin) {
+    // asset value of mainId(ship)
+    mapping(uint256 => uint256) public _shipValue;
+
+    // mainId(ship) counts;
+    uint256 shipCounts;
+
+    // counts of subId
+    mapping(uint256 => uint256) _tokenCount;
+
+    constructor(
+        string memory name,
+        string memory symbol,
+        address _admin,
+        address _stableCoinAddress
+    ) {
         _name = name;
         _symbol = symbol;
         owner = msg.sender;
         admin = _admin;
+        stablecoin = IERC20(_stableCoinAddress);
     }
 
     // Modifiers
@@ -80,6 +101,7 @@ contract DLT is IDLT, IDLTMetadataMintable {
         uint256 mainId,
         uint256 subIdAmounts,
         uint256 tokenAmounts,
+        uint256 shipValue,
         string[] calldata tokenURIs
     ) public virtual onlyOwner returns (bool) {
         require(recipient != address(0), "DLT : mint to the zero address");
@@ -88,14 +110,54 @@ contract DLT is IDLT, IDLTMetadataMintable {
             "DLT : tokenURIs length mismatch with subIdAmounts."
         );
 
-        //
+        _totalSupply[mainId] = tokenAmounts;
         for (uint256 i = 0; i < subIdAmounts; i++) {
             _tokenURI[mainId][i] = tokenURIs[i];
             _balances[mainId][recipient][i] = tokenAmounts;
-            _approve(msg.sender, admin, mainId, i, tokenAmounts);
-            _setApprovalForAll(owner, admin, true);
+            _tokenCount[mainId] = subIdAmounts;
+            _approve(owner, address(this), mainId, i, tokenAmounts);
         }
+        _setApprovalForAll(owner, address(this), true);
+        _shipValue[mainId] = shipValue;
+        shipCounts += 1;
         return true;
+    }
+
+    function invest(uint256 amount, uint256 mainId) public returns (uint256) {
+        require(amount > 0, "DLT : Investing Amount must be greater than zero");
+        require(shipCounts > mainId, "DLT : RWA is not minted yet");
+
+        address investor = msg.sender;
+
+        // ERC-20 토큰을 owner에게 전송
+
+        // 먼저 approve로 허락 받고
+        //require(stablecoin.Approval(investor, address(this), amount), "Stable Coin : Transfer failed");
+        require(
+            stablecoin.transferFrom(investor, owner, amount),
+            "Stable Coin : Transfer failed"
+        );
+
+        // 그만큼 subId 토큰 전송
+        uint256 shipValue = _shipValue[mainId];
+        require(shipValue == 1000, "SHIP VALUE");
+        uint256 totalSupply = _totalSupply[mainId];
+        require(totalSupply == 100, "totalSupply");
+        uint256 pricePerToken = shipValue / totalSupply;
+        require(pricePerToken == 10, "PRICEPERTOEKN");
+        uint256 tokenAmountToUser = amount / pricePerToken;
+        require(tokenAmountToUser == 10, "tokenAmountToUser");
+
+        _setApprovalForAll(owner, address(this), true);
+
+        // 해당 금액만큼 user에게 approve 후 transferfrom
+        for (uint256 i = 0; i < _tokenCount[mainId]; i++) {
+            _approve(owner, investor, mainId, i, tokenAmountToUser);
+
+            safeTransferFrom(owner, investor, mainId, i, tokenAmountToUser);
+        }
+
+        return tokenAmountToUser;
     }
 
     function safeTransferFrom(
@@ -264,10 +326,13 @@ contract DLT is IDLT, IDLTMetadataMintable {
         bytes memory data
     ) internal virtual {
         address spender = msg.sender;
+        //require(owner == address(0), "DLT : approve from the zero address 00000000000");
 
         if (!_isApprovedOrOwner(sender, spender)) {
+            //require(owner == address(0), "DLT : approve from the zero address 1111111111111");
             _spendAllowance(sender, spender, mainId, subId, amount);
         }
+        //require(owner == address(0), "DLT : approve from the zero address 22222222222222");
 
         _safeTransfer(sender, recipient, mainId, subId, amount, data);
     }
@@ -377,6 +442,7 @@ contract DLT is IDLT, IDLTMetadataMintable {
             _balances[mainId][owner][subId] > 0,
             "DLT : You don't own any tokens."
         );
+        // require(owner == address(0), "DLT : approve from the zero address 4444444444444444");
 
         _allowances[owner][spender][mainId][subId] += amount;
         emit Approval(owner, spender, mainId, subId, amount);
@@ -402,7 +468,7 @@ contract DLT is IDLT, IDLTMetadataMintable {
         require(sender != address(0), "DLT : transfer from the zero address");
         require(recipient != address(0), "DLT : transfer to the zero address");
 
-        _beforeTokenTransfer(sender, recipient, mainId, subId, amount, "");
+        //_beforeTokenTransfer(sender, recipient, mainId, subId, amount, "");
 
         require(
             _balances[mainId][sender][subId] >= amount,
@@ -416,7 +482,7 @@ contract DLT is IDLT, IDLTMetadataMintable {
 
         emit Transfer(sender, recipient, mainId, subId, amount);
 
-        _afterTokenTransfer(sender, recipient, mainId, subId, amount, "");
+        //_afterTokenTransfer(sender, recipient, mainId, subId, amount, "");
     }
 
     function _mint(
