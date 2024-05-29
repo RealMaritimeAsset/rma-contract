@@ -6,7 +6,6 @@ import {AggregatorV3Interface} from "@chainlink/contracts@1.1.0/src/v0.8/shared/
 import "@openzeppelin/contracts@5.0.2/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts@5.0.2/access/Ownable.sol";
 import "@openzeppelin/contracts@5.0.2/token/ERC20/extensions/ERC20Permit.sol";
-// import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 
 /**
  * @title Storage
@@ -60,10 +59,6 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
 
     receive() external payable {}
     fallback() external payable {}
-
-    // function mint(address to, uint256 amount) public onlyOwner {
-    //     _mint(to, amount);
-    // }
 
     /**
      * Returns the latest answer.
@@ -197,11 +192,7 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
             // ETH 주고
             user.transfer(valutAmount);
             // stableCoin 받고 다 태워
-            // bool success = transfer(address(0),mintedStablecoins[user]);
             _burn(msg.sender, mintedStablecoins[user]);
-            //_burn()
-
-            // bool success = token.transferFrom(user, address(this), amount);
 
             // 데이터 변환
             weiValut[user] = 0;
