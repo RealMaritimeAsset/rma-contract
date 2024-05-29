@@ -6,6 +6,7 @@ import {AggregatorV3Interface} from "@chainlink/contracts@1.1.0/src/v0.8/shared/
 import "@openzeppelin/contracts@5.0.2/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts@5.0.2/access/Ownable.sol";
 import "@openzeppelin/contracts@5.0.2/token/ERC20/extensions/ERC20Permit.sol";
+// import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 
 /**
  * @title Storage
@@ -60,9 +61,9 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
     receive() external payable {}
     fallback() external payable {}
 
-    function mint(address to, uint256 amount) public onlyOwner {
-        _mint(to, amount);
-    }
+    // function mint(address to, uint256 amount) public onlyOwner {
+    //     _mint(to, amount);
+    // }
 
     /**
      * Returns the latest answer.
@@ -126,7 +127,7 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
         mintedStablecoins[msg.sender] += amountToMint;
 
         // 유저에게 토큰 발행 로직
-        mint(msg.sender, amountToMint);
+        _mint(msg.sender, amountToMint);
 
         return liqudatePrice;
     }
@@ -223,10 +224,6 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
         return address(this).balance;
     }
 
-    function getLinkValutBalance() public view returns (uint256) {
-        return 1;
-    }
-
     function getEthLiqudatePrice() public view returns (uint256) {
         address user = msg.sender;
         return ethLiqudatePrice[user];
@@ -245,6 +242,27 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
         address payable tothe = payable(realOwner);
         uint256 total = address(this).balance;
         tothe.transfer(total);
+        return true;
+    }
+
+    function setLiquadation_ratio(
+        uint256 _liquidation_ratio
+    ) public onlyOwner returns (bool) {
+        liquidation_ratio = _liquidation_ratio;
+        return true;
+    }
+
+    function setLiqudateFeePercent(
+        uint256 _liqudateFeePercent
+    ) public onlyOwner returns (bool) {
+        liqudateFeePercent = _liqudateFeePercent;
+        return true;
+    }
+
+    function setMinimum_collateralization_ratio(
+        uint256 _minimum_collateralization_ratio
+    ) public onlyOwner returns (bool) {
+        minimum_collateralization_ratio = _minimum_collateralization_ratio;
         return true;
     }
 }
