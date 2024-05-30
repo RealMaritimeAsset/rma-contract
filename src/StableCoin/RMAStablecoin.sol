@@ -16,9 +16,9 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
     AggregatorV3Interface internal dataFeed;
     event Deposit(uint256 depositValue);
 
-    address public realOwner;
+    address public rmaAdmin;
 
-    uint256 public minimum_collateralization_ratio;
+    uint256 public minimumCollateralizationRatio;
     uint256 public liquidation_ratio;
     uint256 public ETHUSD;
     mapping(address => uint256) ethLiqudatePrice;
@@ -37,7 +37,7 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
     constructor(
         address initialOwner,
         uint256 _ETHUSD,
-        uint256 _minimum_collateralization_ratio,
+        uint256 _minimumCollateralizationRatio,
         uint256 _liquidation_ratio,
         uint256 _liqudateFeePercent
     )
@@ -51,35 +51,13 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
         );
 
         ETHUSD = _ETHUSD;
-        minimum_collateralization_ratio = _minimum_collateralization_ratio;
+        minimumCollateralizationRatio = _minimumCollateralizationRatio;
         liquidation_ratio = _liquidation_ratio;
         liqudateFeePercent = _liqudateFeePercent;
-        realOwner = msg.sender;
+        rmaAdmin = msg.sender;
     }
 
-    receive() external payable {}
-    fallback() external payable {}
-
-    /**
-     * Returns the latest answer.
-     */
-    function getChainlinkDataFeedLatestAnswer() public view returns (int) {
-        // prettier-ignore
-        (
-            /* uint80 roundID */,
-            int answer,
-            /*uint startedAt*/,
-            /*uint timeStamp*/,
-            /*uint80 answeredInRound*/
-        ) = dataFeed.latestRoundData();
-
-        return answer;
-    }
-
-    function truncate(uint256 ethToUsdRatio) public pure returns (uint256) {
-        return ethToUsdRatio / 1e8;
-    }
-
+    // To Be Deleted... For Test Only
     function setETHUSD(uint256 _ETHUSD) public returns (uint256) {
         ETHUSD = _ETHUSD;
         return ETHUSD;
@@ -95,11 +73,11 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
         // 청산가, 스테이블 코인 발행량 계산
         uint256 weiAmount = msg.value;
         // 3126 x wei / 1e18
-        uint256 latestETHUSD = uint256(getChainlinkDataFeedLatestAnswer());
+        uint256 latestETHUSD = uint256(getLatestETHUSDPrice());
         ETHUSD = latestETHUSD;
-        uint256 truncateETHUSD = truncate(ETHUSD);
+        uint256 truncateETHUSD = truncateETHUSDDecimals(ETHUSD);
         uint256 amountToMint = (((weiAmount * truncateETHUSD) / 1e18) * 100) /
-            minimum_collateralization_ratio;
+            minimumCollateralizationRatio;
         uint256 liqudatePrice = (truncateETHUSD * 100) / liquidation_ratio;
 
         // 만약 이미 발행했었다면, 청산가 다시 계산
@@ -137,11 +115,11 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
     {
         // 현재 가격 계산
         // 200008417972
-        uint256 latestETHUSD = uint256(getChainlinkDataFeedLatestAnswer());
+        uint256 latestETHUSD = uint256(getLatestETHUSDPrice());
         ETHUSD = latestETHUSD;
         // ETHUSD = nowPrice;
         // 2000
-        uint256 truncateETHUSD = truncate(ETHUSD);
+        uint256 truncateETHUSD = truncateETHUSDDecimals(ETHUSD);
 
         // 전체 순회
         for (uint256 i = 0; i < ethMintedAddress.length; i++) {
@@ -183,77 +161,104 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
         return 1;
     }
 
-    function redeemCollateral() public payable returns (bool) {
-        //
+    // External or Public Functions
+
+    function redeemCollateralAndBurn() public payable returns (bool) {
         address payable user = payable(msg.sender);
-        // 담보액 확인
-        if (weiValut[user] > 0) {
-            uint256 valutAmount = weiValut[user];
-            // ETH 주고
-            user.transfer(valutAmount);
-            // stableCoin 받고 다 태워
-            _burn(msg.sender, mintedStablecoins[user]);
 
-            // 데이터 변환
-            weiValut[user] = 0;
-            ethLiqudatePrice[user] = 0;
-            mintedStablecoins[user] = 0;
+        require(
+            weiValut[user] > 0,
+            "Stable Coin : No Collateral available to redeem."
+        );
 
-            // event 발생
-            emit EtherReceived(
-                user,
-                valutAmount,
-                "Redeem Collateral Complete!"
-            );
+        uint256 valutAmount = weiValut[user];
 
-            return true;
-        }
-        return false;
+        // Redeem Collateral ETH to User
+        user.transfer(valutAmount);
+
+        // Burn all Stable coins User minted
+        _burn(msg.sender, mintedStablecoins[user]);
+
+        // Reset All data
+        weiValut[user] = 0;
+        ethLiqudatePrice[user] = 0;
+        mintedStablecoins[user] = 0;
+
+        // Emit Event
+        emit EtherReceived(user, valutAmount, "Redeem Collateral Complete!");
+
+        return true;
     }
 
-    function getweiValutBalance() public view returns (uint256) {
+    function setLiquadation_ratio(
+        uint256 _liquidation_ratio
+    ) external onlyOwner returns (bool) {
+        liquidation_ratio = _liquidation_ratio;
+        return true;
+    }
+
+    function setLiqudationFeePercent(
+        uint256 _liqudateFeePercent
+    ) external onlyOwner returns (bool) {
+        liqudateFeePercent = _liqudateFeePercent;
+        return true;
+    }
+
+    function setMinimumCollateralizationRatio(
+        uint256 _minimumCollateralizationRatio
+    ) external onlyOwner returns (bool) {
+        minimumCollateralizationRatio = _minimumCollateralizationRatio;
+        return true;
+    }
+
+    receive() external payable {}
+
+    fallback() external payable {}
+
+    // Internal or Private Functions
+
+    // View or Pure Functions
+
+    function truncateETHUSDDecimals(
+        uint256 ethUsd
+    ) public pure returns (uint256) {
+        return ethUsd / 1e8;
+    }
+
+    function getLatestETHUSDPrice() public view returns (int) {
+        (
+            ,
+            /* uint80 roundID */ int answer,
+            ,
+            ,
+
+        ) = /*uint startedAt*/ /*uint timeStamp*/ /*uint80 answeredInRound*/
+            dataFeed.latestRoundData();
+
+        return answer;
+    }
+
+    function getTotalCollateralBalance() public view returns (uint256) {
         return address(this).balance;
     }
 
-    function getEthLiqudatePrice() public view returns (uint256) {
-        address user = msg.sender;
-        return ethLiqudatePrice[user];
+    function getCollateralBalance() public view returns (uint256) {
+        return weiValut[msg.sender];
     }
 
-    function getweiValut() public view returns (uint256) {
-        address user = msg.sender;
-        return weiValut[user];
+    function getEthLiquidationPrice() public view returns (uint256) {
+        return ethLiqudatePrice[msg.sender];
     }
 
     function getStablecoinBalance() public view returns (uint256) {
         return mintedStablecoins[msg.sender];
     }
 
+    // To be Deleted.... For testOnly
     function reset() public payable returns (bool) {
-        address payable tothe = payable(realOwner);
+        address payable tothe = payable(rmaAdmin);
         uint256 total = address(this).balance;
         tothe.transfer(total);
-        return true;
-    }
-
-    function setLiquadation_ratio(
-        uint256 _liquidation_ratio
-    ) public onlyOwner returns (bool) {
-        liquidation_ratio = _liquidation_ratio;
-        return true;
-    }
-
-    function setLiqudateFeePercent(
-        uint256 _liqudateFeePercent
-    ) public onlyOwner returns (bool) {
-        liqudateFeePercent = _liqudateFeePercent;
-        return true;
-    }
-
-    function setMinimum_collateralization_ratio(
-        uint256 _minimum_collateralization_ratio
-    ) public onlyOwner returns (bool) {
-        minimum_collateralization_ratio = _minimum_collateralization_ratio;
         return true;
     }
 }
