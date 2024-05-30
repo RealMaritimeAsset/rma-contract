@@ -21,13 +21,24 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
     uint256 public minimumCollateralizationRatio;
     uint256 public liquidation_ratio;
     uint256 public ETHUSD;
-    mapping(address => uint256) ethLiqudatePrice;
-    mapping(address => uint256) weiValut;
+    mapping(address => uint256) ethLiqudationPrice;
+    mapping(address => uint256) userCollateralWei;
     mapping(address => uint256) mintedStablecoins;
-    address[] ethMintedAddress;
+    address[] participantAddresses;
     uint256 public liqudateFeePercent;
 
     event EtherReceived(address indexed user, uint256 amount, string message);
+    event CollateralRedeemed(
+        address indexed user,
+        uint256 collateralAmount,
+        uint256 burnedAmount,
+        string message
+    );
+    event CollateralLiquidated(
+        address indexed user,
+        uint256 refundWeiAmount,
+        string message
+    );
 
     /**
      * Network: Sepolia
@@ -57,12 +68,6 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
         rmaAdmin = msg.sender;
     }
 
-    // To Be Deleted... For Test Only
-    function setETHUSD(uint256 _ETHUSD) public returns (uint256) {
-        ETHUSD = _ETHUSD;
-        return ETHUSD;
-    }
-
     function mintByEth() public payable returns (uint256) {
         // 사전 검증
         require(
@@ -73,7 +78,7 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
         // 청산가, 스테이블 코인 발행량 계산
         uint256 weiAmount = msg.value;
         // 3126 x wei / 1e18
-        uint256 latestETHUSD = uint256(getLatestETHUSDPrice());
+        uint256 latestETHUSD = uint256(getLatestETHUSD());
         ETHUSD = latestETHUSD;
         uint256 truncateETHUSD = truncateETHUSDDecimals(ETHUSD);
         uint256 amountToMint = (((weiAmount * truncateETHUSD) / 1e18) * 100) /
@@ -81,22 +86,22 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
         uint256 liqudatePrice = (truncateETHUSD * 100) / liquidation_ratio;
 
         // 만약 이미 발행했었다면, 청산가 다시 계산
-        if (weiValut[msg.sender] > 0) {
-            uint256 valutWei = weiValut[msg.sender];
+        if (userCollateralWei[msg.sender] > 0) {
+            uint256 collateral = userCollateralWei[msg.sender];
             // uint256 nowETHUSD = ETHUSD;
             // // 기존 1 이더, 새로운 2이더
             // // 그때 청산가 2000, 현재 3000
             // // 청산가 = (1 x 2000) + (2 x 6000) / 1+2 = 2666
             liqudatePrice =
-                ((valutWei * ethLiqudatePrice[msg.sender]) +
+                ((collateral * ethLiqudationPrice[msg.sender]) +
                     (weiAmount * liqudatePrice)) /
-                (valutWei + weiAmount);
+                (collateral + weiAmount);
         }
 
         // 저장 : 발행인 등록, 청산가, 담보 액수, 달러 발행 액수
-        ethMintedAddress.push(msg.sender);
-        ethLiqudatePrice[msg.sender] = liqudatePrice;
-        weiValut[msg.sender] += msg.value;
+        participantAddresses.push(msg.sender);
+        ethLiqudationPrice[msg.sender] = liqudatePrice;
+        userCollateralWei[msg.sender] += msg.value;
         mintedStablecoins[msg.sender] += amountToMint;
 
         // 유저에게 토큰 발행 로직
@@ -105,60 +110,48 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
         return liqudatePrice;
     }
 
-    function autoEthLiqudate()
-        public
-        payable
-        returns (
-            //uint256 nowPrice
-            uint256
-        )
-    {
-        // 현재 가격 계산
-        // 200008417972
-        uint256 latestETHUSD = uint256(getLatestETHUSDPrice());
-        ETHUSD = latestETHUSD;
-        // ETHUSD = nowPrice;
-        // 2000
-        uint256 truncateETHUSD = truncateETHUSDDecimals(ETHUSD);
+    function autoEthLiqudate() public payable {
+        // `getLatestETHUSD()` and Truncate the decimals
+        uint256 latestETHUSD = truncateETHUSDDecimals(
+            uint256(getLatestETHUSD())
+        );
 
-        // 전체 순회
-        for (uint256 i = 0; i < ethMintedAddress.length; i++) {
-            // 청산가가 현재 가격보다 높으면 청산
-            if (ethLiqudatePrice[ethMintedAddress[i]] > truncateETHUSD) {
-                address payable user = payable(ethMintedAddress[i]);
+        // Iterate over users who have participated
+        // (who have Deposit Collateral and Issued Stablecoins)
+        for (uint256 i = 0; i < participantAddresses.length; i++) {
+            // If `ethLiqudationPrice` of user is higher than `latestETHUSD`,
+            // Liquidation begins.
+            if (ethLiqudationPrice[participantAddresses[i]] > latestETHUSD) {
+                address payable user = payable(participantAddresses[i]);
 
-                //현재 가격으로 팔았다고 치고 차액만큼 돌려주기
+                uint256 currentCollateralPrice = (userCollateralWei[user] *
+                    latestETHUSD) / 1e18;
 
-                // 5000000000000000000
-                uint256 valutWei = weiValut[user];
-                //
-                uint256 nowCollateralPrice = (valutWei * truncateETHUSD) / 1e18;
-                uint256 liquidatationFee = (nowCollateralPrice *
+                uint256 liquidatationFee = (currentCollateralPrice *
                     liqudateFeePercent) / 100;
 
-                uint256 refundAmountDollar = nowCollateralPrice -
+                uint256 refundAmountDollar = currentCollateralPrice -
                     mintedStablecoins[user] -
                     liquidatationFee;
-                uint256 refundAmoutWei = (refundAmountDollar * 1 ether) /
-                    truncateETHUSD;
 
-                // 유저에게 차액 전송
-                user.transfer(refundAmoutWei);
+                uint256 netRefundAmoutWei = (refundAmountDollar * 1 ether) /
+                    latestETHUSD;
 
-                // //이벤트 알림
-                emit EtherReceived(
+                // Transfer refundAmountWei to User
+                user.transfer(netRefundAmoutWei);
+
+                // Clear all data
+                ethLiqudationPrice[user] = 0;
+                userCollateralWei[user] = 0;
+
+                // Emit Event {CollateralLiquidated}
+                emit CollateralLiquidated(
                     user,
-                    refundAmoutWei,
-                    "Your Valut is liqudated"
+                    netRefundAmoutWei,
+                    "Your Collateral is liqudated and Transferred net refund"
                 );
-
-                // // 수정 : 청산가 = 0 , 담보 액수 = 0으로 등록
-                ethLiqudatePrice[user] = 0;
-                weiValut[user] = 0;
             }
         }
-
-        return 1;
     }
 
     // External or Public Functions
@@ -167,11 +160,11 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
         address payable user = payable(msg.sender);
 
         require(
-            weiValut[user] > 0,
+            userCollateralWei[user] > 0,
             "Stable Coin : No Collateral available to redeem."
         );
 
-        uint256 valutAmount = weiValut[user];
+        uint256 valutAmount = userCollateralWei[user];
 
         // Redeem Collateral ETH to User
         user.transfer(valutAmount);
@@ -180,12 +173,17 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
         _burn(msg.sender, mintedStablecoins[user]);
 
         // Reset All data
-        weiValut[user] = 0;
-        ethLiqudatePrice[user] = 0;
+        userCollateralWei[user] = 0;
+        ethLiqudationPrice[user] = 0;
         mintedStablecoins[user] = 0;
 
-        // Emit Event
-        emit EtherReceived(user, valutAmount, "Redeem Collateral Complete!");
+        // Emit Event {CollateralRedeemed}
+        emit CollateralRedeemed(
+            user,
+            valutAmount,
+            mintedStablecoins[user],
+            "Collateral Redeemed and Stablecoin Burned"
+        );
 
         return true;
     }
@@ -211,6 +209,12 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
         return true;
     }
 
+    // To Be Deleted... For Test Only
+    function setETHUSD(uint256 _ETHUSD) public returns (uint256) {
+        ETHUSD = _ETHUSD;
+        return ETHUSD;
+    }
+
     receive() external payable {}
 
     fallback() external payable {}
@@ -225,7 +229,7 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
         return ethUsd / 1e8;
     }
 
-    function getLatestETHUSDPrice() public view returns (int) {
+    function getLatestETHUSD() public view returns (int) {
         (
             ,
             /* uint80 roundID */ int answer,
@@ -243,11 +247,11 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
     }
 
     function getCollateralBalance() public view returns (uint256) {
-        return weiValut[msg.sender];
+        return userCollateralWei[msg.sender];
     }
 
     function getEthLiquidationPrice() public view returns (uint256) {
-        return ethLiqudatePrice[msg.sender];
+        return ethLiqudationPrice[msg.sender];
     }
 
     function getStablecoinBalance() public view returns (uint256) {
