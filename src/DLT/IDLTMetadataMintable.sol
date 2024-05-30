@@ -25,6 +25,7 @@ interface IDLTMetadataMintable {
         uint256 mainId,
         uint256 subIdAmounts,
         uint256 tokenAmounts,
+        uint256 shipValue,
         string[] calldata tokenURIs
     ) external returns (bool);
 }
