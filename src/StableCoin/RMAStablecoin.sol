@@ -6,15 +6,19 @@ import {AggregatorV3Interface} from "@chainlink/contracts@1.1.0/src/v0.8/shared/
 import "@openzeppelin/contracts@5.0.2/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts@5.0.2/access/Ownable.sol";
 import "@openzeppelin/contracts@5.0.2/token/ERC20/extensions/ERC20Permit.sol";
+import "contracts/IGovernanceToken.sol";
 
 /**
  * @title  Crypto-Collateralized(i.e. eth) Stablecoin contract
  * @author Dreamboys
  * @notice You can use this contract for only `Sepolia` network because of `datafeed`.
  * @dev You MUST register chainlink automation after deploying contract, `https://automation.chain.link/mainnet`.
- *      You MUST set the trigger as `Time-based` and set target function `autoEthLiqudate`.
- *      It is recommended to set the scheduler time to no less than 10 minutes
- *      due to the volatility of eth prices.
+ * You MUST set the trigger as `Time-based` and set target function `autoEthLiqudate`.
+ * It is recommended to set the scheduler time to no less than 10 minutes
+ * due to the volatility of eth prices.
+ *
+ * You MUST deploy `RMAGovernanceToken.sol` and `RMAGovernor.sol` in advance.
+ *
  */
 contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
     /**
@@ -29,6 +33,7 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
     mapping(address => uint256) ethLiquidationPrice;
     mapping(address => uint256) userCollateralWei;
     mapping(address => uint256) mintedStablecoins;
+    mapping(address => uint256) mintedGovernanceToken;
 
     /// Addresses
     address public rmaAdmin;
@@ -39,6 +44,9 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
 
     /// Chainlink Data Feed Interface
     AggregatorV3Interface internal dataFeed;
+
+    /// GovernanceToken Interface;
+    IgovernanceToken public governanceToken;
 
     /// Events
     event CollateralRedeemed(
@@ -73,9 +81,16 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
         uint256 newValue,
         string message
     );
+    event GovernanceTokenMinted(
+        address indexed user,
+        uint256 tokenAmount,
+        uint256 totalAmount,
+        string message
+    );
 
     constructor(
         address initialOwner,
+        address _governanceTokenAddress,
         /// To Be Deleted
         uint256 _ETHUSD,
         uint256 _minimumCollateralizationRatio,
@@ -95,6 +110,7 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
         minimumCollateralizationRatio = _minimumCollateralizationRatio;
         liquidation_ratio = _liquidation_ratio;
         liqudateFeePercent = _liqudateFeePercent;
+        governanceToken = IgovernanceToken(_governanceTokenAddress);
         rmaAdmin = msg.sender;
     }
 
@@ -102,6 +118,9 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
      * @dev Mints stablecoins by sending ETH as collateral.
      * @notice This function allows users to mint stablecoins by depositing ETH.
      * It calculates the amount of stablecoins to mint and new liquidation price.
+     * `RMAGovernanceToken` will be minted
+     * if the total amount of stable coin user has minted is over 100.
+     * 100 stable coins are required to mint 1 governance token.
      * @return the new(or updated) liquidatePrice of the user.
      */
     function mintByEth() public payable returns (uint256) {
@@ -115,10 +134,10 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
         uint256 weiAmount = msg.value;
 
         /// Get latest ETH/USD price using chainlink datafeed.
-        uint256 latestETHUSD = uint256(getLatestETHUSD());
+        //uint256 latestETHUSD = uint256(getLatestETHUSD());
 
         /// Update `ETHUSD`
-        ETHUSD = latestETHUSD;
+        //ETHUSD = latestETHUSD;
 
         /// Truncate the decimals
         uint256 truncateETHUSD = truncateETHUSDDecimals(ETHUSD);
@@ -134,24 +153,49 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
 
         /// @dev If user has minted stablecoin already,
         /// `liquidatePrice` MUST be recalculated again.
-        if (userCollateralWei[msg.sender] > 0) {
-            uint256 collateral = userCollateralWei[msg.sender];
+        if (userCollateralWei[user] > 0) {
+            uint256 collateral = userCollateralWei[user];
 
             /// Recalculate liquidation price based on existing and new collateral
             liquidatePrice =
-                ((collateral * ethLiquidationPrice[msg.sender]) +
+                ((collateral * ethLiquidationPrice[user]) +
                     (weiAmount * liquidatePrice)) /
                 (collateral + weiAmount);
         }
 
         /// Update all data involved.
-        participantAddresses.push(msg.sender);
-        ethLiquidationPrice[msg.sender] = liquidatePrice;
-        userCollateralWei[msg.sender] += msg.value;
-        mintedStablecoins[msg.sender] += amountToMint;
+        participantAddresses.push(user);
+        ethLiquidationPrice[user] = liquidatePrice;
+        userCollateralWei[user] += msg.value;
+        mintedStablecoins[user] += amountToMint;
 
         /// Mint Stablecoin to user.
-        _mint(msg.sender, amountToMint);
+        _mint(user, amountToMint);
+
+        /// If total stable coins that user has minted is greater than 100
+        if (mintedStablecoins[user] >= 100) {
+            /// Calculate the expected number of governance tokens based on minted stablecoins
+            uint256 tempGovernanceTokens = mintedStablecoins[user] / 100;
+
+            /// Get the user's current balance of governance tokens
+            uint256 governanceTokenMinted = mintedGovernanceToken[user];
+
+            /// Calculate the number of governance tokens to mint
+            uint256 governanceTokenToMint = tempGovernanceTokens -
+                governanceTokenMinted;
+
+            /// Mint governance token to the user
+            governanceToken.safeMint(user, governanceTokenToMint);
+
+            /// Update the user's governanace token balance
+            mintedGovernanceToken[user] += governanceTokenToMint;
+            emit GovernanceTokenMinted(
+                user,
+                governanceTokenToMint,
+                governanceTokenMinted,
+                "Governance token minted"
+            );
+        }
 
         /// Emit Event {StablecoinMinted}
         emit StablecoinMinted(
@@ -248,7 +292,7 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
         user.transfer(collateralAmount);
 
         /// Burn all Stable coins User minted
-        _burn(msg.sender, mintedStablecoins[user]);
+        _burn(user, mintedStablecoins[user]);
 
         /// Reset All data
         userCollateralWei[user] = 0;
@@ -353,11 +397,12 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
     function getLatestETHUSD() public view returns (int) {
         (
             ,
-            /* uint80 roundID */ int answer /*uint startedAt*/ /*uint timeStamp*/ /*uint80 answeredInRound*/,
+            /* uint80 roundID */ int answer,
             ,
             ,
 
-        ) = dataFeed.latestRoundData();
+        ) = /*uint startedAt*/ /*uint timeStamp*/ /*uint80 answeredInRound*/
+            dataFeed.latestRoundData();
 
         return answer;
     }
