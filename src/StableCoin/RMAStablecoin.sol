@@ -8,26 +8,39 @@ import "@openzeppelin/contracts@5.0.2/access/Ownable.sol";
 import "@openzeppelin/contracts@5.0.2/token/ERC20/extensions/ERC20Permit.sol";
 
 /**
- * @title Storage
- * @dev Store & retrieve value in a variable
- * @custom:dev-run-script ./scripts/deploy_with_ethers.ts
+ * @title  Crypto-Collateralized(i.e. eth) Stablecoin contract
+ * @author Dreamboys
+ * @notice You can use this contract for only `Sepolia` network because of `datafeed`.
+ * @dev You MUST register chainlink automation after deploying contract, `https://automation.chain.link/mainnet`.
+ *      You MUST set the trigger as `Time-based` and set target function `autoEthLiqudate`.
+ *      It is recommended to set the scheduler time to no less than 10 minutes
+ *      due to the volatility of eth prices.
  */
 contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
-    AggregatorV3Interface internal dataFeed;
-    event Deposit(uint256 depositValue);
-
-    address public rmaAdmin;
-
+    /**
+     * @dev These values can be adjusted through governance.
+     * @notice Collateralization Parameters
+     */
     uint256 public minimumCollateralizationRatio;
     uint256 public liquidation_ratio;
-    uint256 public ETHUSD;
+    uint256 public liqudateFeePercent;
+
+    /// Mappings
     mapping(address => uint256) ethLiqudationPrice;
     mapping(address => uint256) userCollateralWei;
     mapping(address => uint256) mintedStablecoins;
-    address[] participantAddresses;
-    uint256 public liqudateFeePercent;
 
-    event EtherReceived(address indexed user, uint256 amount, string message);
+    /// Addresses
+    address public rmaAdmin;
+    address[] participantAddresses;
+
+    /// lateset ETH/USD price
+    uint256 public ETHUSD;
+
+    /// Chainlink Data Feed Interface
+    AggregatorV3Interface internal dataFeed;
+
+    /// Events
     event CollateralRedeemed(
         address indexed user,
         uint256 collateralAmount,
@@ -40,11 +53,6 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
         string message
     );
 
-    /**
-     * Network: Sepolia
-     * Aggregator: ETH/USD
-     * Address: 0x694AA1769357215DE4FAC081bf1f309aDC325306
-     */
     constructor(
         address initialOwner,
         uint256 _ETHUSD,
@@ -53,9 +61,9 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
         uint256 _liqudateFeePercent
     )
         payable
-        ERC20("StableCoin", "USDR")
+        ERC20("RMAStableCoin", "USDR")
         Ownable(initialOwner)
-        ERC20Permit("StableCoin")
+        ERC20Permit("RMAStableCoin")
     {
         dataFeed = AggregatorV3Interface(
             0x694AA1769357215DE4FAC081bf1f309aDC325306

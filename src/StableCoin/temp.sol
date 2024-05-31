@@ -22,3 +22,16 @@ function _redeemCollateralAndBurn(
 
     return true;
 }
+
+
+
+        uint256 latestETHUSD = uint256(getLatestETHUSDPrice());
+
+        uint256 truncatedETHUSD = truncateETHUSDDecimals(latestETHUSD);
+
+
+        uint256 truncatedETHUSD = truncateETHUSDDecimals(latestETHUSD);
+
+
+
+
