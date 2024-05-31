@@ -52,6 +52,27 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
         uint256 refundWeiAmount,
         string message
     );
+    event StablecoinMinted(
+        address indexed user,
+        uint256 mintedAmount,
+        uint256 collateralAmount,
+        string message
+    );
+    event MinimumCollateralizationRatioChanged(
+        uint256 oldValue,
+        uint256 newValue,
+        string message
+    );
+    event LiquidationFeePercentChanged(
+        uint256 oldValue,
+        uint256 newValue,
+        string message
+    );
+    event LiquidationRatioChanged(
+        uint256 oldValue,
+        uint256 newValue,
+        string message
+    );
 
     constructor(
         address initialOwner,
@@ -88,6 +109,8 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
             msg.value > 0,
             "StableCoin: you have to send ETH to mint Stable Coin"
         );
+
+        address user = msg.sender;
 
         uint256 weiAmount = msg.value;
 
@@ -127,8 +150,16 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
         userCollateralWei[msg.sender] += msg.value;
         mintedStablecoins[msg.sender] += amountToMint;
 
-        // Mint Stablecoin to user.
+        /// Mint Stablecoin to user.
         _mint(msg.sender, amountToMint);
+
+        /// Emit Event {StablecoinMinted}
+        emit StablecoinMinted(
+            user,
+            amountToMint,
+            weiAmount,
+            "Stablecoin minted"
+        );
 
         return liquidatePrice;
     }
@@ -237,31 +268,52 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
 
     /**
      * @dev This function MUST be called as a result of a governance decision.
+     * Emit {LiquidationRatioChanged}.
      */
     function setLiquadation_ratio(
         uint256 _liquidation_ratio
     ) external onlyOwner returns (bool) {
+        uint256 oldValue = liquidation_ratio;
         liquidation_ratio = _liquidation_ratio;
+        emit LiquidationRatioChanged(
+            oldValue,
+            liquidation_ratio,
+            "Liquidation ratio changed"
+        );
         return true;
     }
 
     /**
      * @dev This function MUST be called as a result of a governance decision.
+     * Emit {LiquidationFeePercentChanged}.
      */
     function setLiqudationFeePercent(
         uint256 _liqudateFeePercent
     ) external onlyOwner returns (bool) {
+        uint256 oldValue = liqudateFeePercent;
         liqudateFeePercent = _liqudateFeePercent;
+        emit LiquidationFeePercentChanged(
+            oldValue,
+            liqudateFeePercent,
+            "Liquidation Fee percent changed"
+        );
         return true;
     }
 
     /**
      * @dev This function MUST be called as a result of a governance decision.
+     * Emit {MinimumCollateralizationRatioChanged}.
      */
     function setMinimumCollateralizationRatio(
         uint256 _minimumCollateralizationRatio
     ) external onlyOwner returns (bool) {
+        uint256 oldValue = minimumCollateralizationRatio;
         minimumCollateralizationRatio = _minimumCollateralizationRatio;
+        emit MinimumCollateralizationRatioChanged(
+            oldValue,
+            minimumCollateralizationRatio,
+            "Minimum collateralization ratio changed"
+        );
         return true;
     }
 
@@ -301,12 +353,11 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
     function getLatestETHUSD() public view returns (int) {
         (
             ,
-            /* uint80 roundID */ int answer,
+            /* uint80 roundID */ int answer /*uint startedAt*/ /*uint timeStamp*/ /*uint80 answeredInRound*/,
             ,
             ,
 
-        ) = /*uint startedAt*/ /*uint timeStamp*/ /*uint80 answeredInRound*/
-            dataFeed.latestRoundData();
+        ) = dataFeed.latestRoundData();
 
         return answer;
     }
