@@ -3,10 +3,10 @@
 pragma solidity ^0.8.20;
 
 import {AggregatorV3Interface} from "@chainlink/contracts@1.1.0/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
-import "@openzeppelin/contracts@5.0.2/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts@5.0.2/access/Ownable.sol";
-import "@openzeppelin/contracts@5.0.2/token/ERC20/extensions/ERC20Permit.sol";
-import "contracts/IGovernanceToken.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
+import "./IGovernanceToken.sol";
 
 /**
  * @title  Crypto-Collateralized(i.e. eth) Stablecoin contract
@@ -395,12 +395,11 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
     function getLatestETHUSD() public view returns (int) {
         (
             ,
-            /* uint80 roundID */ int answer,
+            /* uint80 roundID */ int answer /*uint startedAt*/ /*uint timeStamp*/ /*uint80 answeredInRound*/,
             ,
             ,
 
-        ) = /*uint startedAt*/ /*uint timeStamp*/ /*uint80 answeredInRound*/
-            dataFeed.latestRoundData();
+        ) = dataFeed.latestRoundData();
 
         return answer;
     }

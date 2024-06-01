@@ -1,7 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "contracts/IGovernanceToken.sol";
+// For Remix
+// import "contracts/IGovernanceToken.sol";
+
+// For Foundry
+import "./IGovernanceToken.sol";
 
 /**
  * @title  RMAGovernance for RMA ecosystem.
