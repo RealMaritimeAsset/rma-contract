@@ -78,7 +78,7 @@ contract RMAGovernance {
     modifier meetsTokenThreshold() {
         require(
             _getGovernanceTokenBalance() >= tokenThreshold,
-            "Governance : "
+            "Governance : not meet tokenThreshold "
         );
         _;
     }
