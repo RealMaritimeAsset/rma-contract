@@ -17,7 +17,7 @@ import "contracts/IGovernanceToken.sol";
  * It is recommended to set the scheduler time to no less than 10 minutes
  * due to the volatility of eth prices.
  *
- * You MUST deploy `RMAGovernanceToken.sol` and `RMAGovernor.sol` in advance.
+ * You MUST deploy `RMAGovernanceToken.sol` and `RMAGovernance.sol` in advance.
  *
  */
 contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
@@ -113,6 +113,12 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
         governanceToken = IgovernanceToken(_governanceTokenAddress);
         rmaAdmin = msg.sender;
     }
+
+    /// Receive/Fallback Functions
+    receive() external payable {}
+    fallback() external payable {}
+
+    /// External or Public Functions
 
     /**
      * @dev Mints stablecoins by sending ETH as collateral.
@@ -271,8 +277,6 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
         return true;
     }
 
-    /// External or Public Functions
-
     /**
      * @dev This function allows a user to redeem their collateral and burn the corresponding stablecoins.
      * It transfers the user's collateral back to their address, burns all stablecoins minted by the user,
@@ -366,12 +370,6 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
         ETHUSD = _ETHUSD;
         return ETHUSD;
     }
-
-    receive() external payable {}
-
-    fallback() external payable {}
-
-    /// Internal or Private Functions
 
     /// View or Pure Functions
 

@@ -49,11 +49,15 @@ contract RMAGovernanceToken is
         _mint(to, amount);
     }
 
+    /// @param user is the address of governance token holder.
+    /// @return the amount of governance tokens user holds.
     function getBalanceOf(address user) public view returns (uint256) {
         uint256 balance = balanceOf(user);
         return balance;
     }
 
+    /// @dev Function to get totalsupply of governance tokens.
+    /// @return the total amount of governance tokens.
     function getTotalSupply() public view returns (uint256) {
         uint256 totalSupply = totalSupply();
         return totalSupply;
