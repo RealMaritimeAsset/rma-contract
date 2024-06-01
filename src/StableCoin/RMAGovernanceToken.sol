@@ -49,6 +49,16 @@ contract RMAGovernanceToken is
         _mint(to, amount);
     }
 
+    function getBalanceOf(address user) public view returns (uint256) {
+        uint256 balance = balanceOf(user);
+        return balance;
+    }
+
+    function getTotalSupply() public view returns (uint256) {
+        uint256 totalSupply = totalSupply();
+        return totalSupply;
+    }
+
     function mint(address to, uint256 amount) public onlyMinter {
         _mint(to, amount);
     }
