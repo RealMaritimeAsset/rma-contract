@@ -44,17 +44,22 @@ contract DLT is IDLT, IDLTMetadataMintable {
     // counts of subId
     mapping(uint256 => uint256) _tokenCount;
 
+    // chainlink Function Address
+    address public chainlinkFunctionAddress;
+
     constructor(
         string memory name,
         string memory symbol,
         address _admin,
-        address _stableCoinAddress
+        address _stableCoinAddress,
+        address _chainlinkFunctionAddress
     ) {
         _name = name;
         _symbol = symbol;
         owner = msg.sender;
         admin = _admin;
         stablecoin = IERC20(_stableCoinAddress);
+        chainlinkFunctionAddress = _chainlinkFunctionAddress;
     }
 
     // Modifiers
@@ -77,6 +82,27 @@ contract DLT is IDLT, IDLTMetadataMintable {
     }
 
     // Functions
+
+    function callChainlinkFunction(
+        uint256 _subscriptionId,
+        string[] calldata _args
+    ) public returns (string memory) {
+        (bool sucess, bytes memory data) = chainlinkFunctionAddress.call(
+            abi.encodeWithSignature(
+                "sendRequest(uint64 subscriptionId,string[] calldata args)",
+                _subscriptionId,
+                _args
+            )
+        );
+        require(sucess, "call chainlinkFunction failed");
+        string memory returnValue = abi.decode(data, (string));
+        return returnValue;
+    }
+
+    // function getChainlinkFunction() public returns (string memory) {
+    //     string memory  weather = chainlinkFunctionAddress.character();
+    //  return weather;
+    // }
 
     function approve(
         address operator,
@@ -123,7 +149,10 @@ contract DLT is IDLT, IDLTMetadataMintable {
         return true;
     }
 
-    function invest(uint256 amount, uint256 mainId) public returns (uint256) {
+    function invest(
+        uint256 amount,
+        uint256 mainId
+    ) public payable returns (uint256) {
         require(amount > 0, "DLT : Investing Amount must be greater than zero");
         require(shipCounts > mainId, "DLT : RWA is not minted yet");
 
@@ -140,13 +169,9 @@ contract DLT is IDLT, IDLTMetadataMintable {
 
         // 그만큼 subId 토큰 전송
         uint256 shipValue = _shipValue[mainId];
-        require(shipValue == 1000, "SHIP VALUE");
         uint256 totalSupply = _totalSupply[mainId];
-        require(totalSupply == 100, "totalSupply");
         uint256 pricePerToken = shipValue / totalSupply;
-        require(pricePerToken == 10, "PRICEPERTOEKN");
         uint256 tokenAmountToUser = amount / pricePerToken;
-        require(tokenAmountToUser == 10, "tokenAmountToUser");
 
         _setApprovalForAll(owner, address(this), true);
 
