@@ -4,22 +4,29 @@ pragma solidity 0.8.19;
 import {IDLT} from "./IDLT.sol";
 import {IDLTReceiver} from "./IDLTReceiver.sol";
 import {IDLTMetadataMintable} from "./IDLTMetadataMintable.sol";
+import "./IERC20.sol";
 
 contract DLT is IDLT, IDLTMetadataMintable {
+    // Company name
     string private _name;
+    // Company symbol
     string private _symbol;
+    // Company address
     address public owner;
-    uint256 public _mainIdCounts;
-    // 메인 아이디 마다도 정보 있어야 함 (선박 정보)
-    //mapping(uint256 => string) public _mainIdURI;
-    string[] public _mainIdURI;
+    // RMA admin address
+    address public admin;
+    // Stablecoin Interface;
+    IERC20 public stablecoin;
 
-    // Balances
+    // Total Supply of subId token
+    mapping(uint256 => uint256) public _totalSupply;
+
+    // Balances of subTokens
     mapping(uint256 => mapping(address => mapping(uint256 => uint256)))
         internal _balances;
 
-    // IPFS tokenURI for token Metadata
-    mapping(uint256 => mapping(uint256 => string)) public _tokenURI;
+    // IPFS tokenURI for subToken
+    mapping(uint256 => mapping(uint256 => string)) private _tokenURI;
 
     // ex. owner => operator => true
     mapping(address => mapping(address => bool)) private _operatorApprovals;
@@ -28,32 +35,83 @@ contract DLT is IDLT, IDLTMetadataMintable {
     mapping(address => mapping(address => mapping(uint256 => mapping(uint256 => uint256))))
         private _allowances;
 
+    // asset value of mainId(ship)
+    mapping(uint256 => uint256) public _shipValue;
+
+    // mainId(ship) counts;
+    uint256 shipCounts;
+
+    // counts of subId
+    mapping(uint256 => uint256) _tokenCount;
+
+    // chainlink Function Address
+    address public chainlinkFunctionAddress;
+
     constructor(
-        //address _stableCoinAddress,
         string memory name,
-        string memory symbol
+        string memory symbol,
+        address _admin,
+        address _stableCoinAddress,
+        address _chainlinkFunctionAddress
     ) {
         _name = name;
         _symbol = symbol;
         owner = msg.sender;
+        admin = _admin;
+        stablecoin = IERC20(_stableCoinAddress);
+        chainlinkFunctionAddress = _chainlinkFunctionAddress;
     }
 
     // Modifiers
     modifier onlyOwner() {
-        require(owner == msg.sender, "Caller is not the Owner.");
+        require(owner == msg.sender, "DLT : Caller is not the Owner.");
+        _;
+    }
+
+    modifier onlyAdmin() {
+        require(admin == msg.sender, "DLT : Caller is not the Admin.");
+        _;
+    }
+
+    modifier onlyOwnerOrAdmin() {
+        require(
+            (admin == msg.sender || owner == msg.sender),
+            "DLT : Caller is not the Admin or Owner."
+        );
         _;
     }
 
     // Functions
+
+    function callChainlinkFunction(
+        uint256 _subscriptionId,
+        string[] calldata _args
+    ) public returns (string memory) {
+        (bool sucess, bytes memory data) = chainlinkFunctionAddress.call(
+            abi.encodeWithSignature(
+                "sendRequest(uint64 subscriptionId,string[] calldata args)",
+                _subscriptionId,
+                _args
+            )
+        );
+        require(sucess, "call chainlinkFunction failed");
+        string memory returnValue = abi.decode(data, (string));
+        return returnValue;
+    }
+
+    // function getChainlinkFunction() public returns (string memory) {
+    //     string memory  weather = chainlinkFunctionAddress.character();
+    //  return weather;
+    // }
 
     function approve(
         address operator,
         uint256 mainId,
         uint256 subId,
         uint256 amount
-    ) public onlyOwner returns (bool) {
-        address owner = msg.sender;
-        _approve(owner, operator, mainId, subId, amount);
+    ) public returns (bool) {
+        address investor = msg.sender;
+        _approve(investor, operator, mainId, subId, amount);
         return true;
     }
 
@@ -64,95 +122,67 @@ contract DLT is IDLT, IDLTMetadataMintable {
         _setApprovalForAll(msg.sender, operator, approved);
     }
 
-    /**
-     * @notice When company raises funds to buy or build ship
-     * @param mainIdURI is the IPFS mainIdURI for ship info.
-     * @param subIdCounts is the counts of subId token
-     * @param tokenURIs is the array of IPFS tokenURI for each subId token.
-     */
-    function mintNewShip(
-        string calldata mainIdURI,
-        uint256 subIdCounts,
-        string[] calldata tokenURIs
-    ) public virtual returns (bool) {
-        // 1. owner만 실행
-        require(
-            owner == msg.sender,
-            "DLT : onlyOwner can call mintNewship function"
-        );
-        // 2. subIdCounts 개수랑 tokenURIs 길이 같아야
-        require(
-            subIdCounts == tokenURIs.length,
-            "DLT : tokenURIs length must be same with subIdCounts"
-        );
-        // 3. 현재 몇 개 ship(mainId) 민팅했는지 체크
-        uint256 newMainId = _mainIdCounts;
-
-        // 4. mainId URI 등록
-        _mainIdURI.push(mainIdURI);
-        // . subId 마다 tokenURI 등록
-        for (uint256 i = 0; i < subIdCounts; i++) {
-            _tokenURI[newMainId][i] = tokenURIs[i];
-        }
-        // _mainIdCounts 증가
-        _mainIdCounts++;
-        return true;
-    }
-
-    /**
-     * @notice When investor invests Stable Coin(KRWT)
-     * @param amounts is the amounts of Stable Coin(KRWT) user wants to invest
-     * Users get various tokens proportionally to the amount invested.
-     * @return bool
-     */
-    function investFund(uint256 amounts) public virtual returns (bool) {
-        // 1. owner만 실행
-        // msg.value
-        // 2. subIdCounts 개수랑 tokenURIs 길이 같아야
-        // 3. 현재 몇 개 ship(mainId) 민팅했는지 체크
-        // 4. mainId URI 등록
-    }
-
-    /**
-     * @notice When mainId's metadata is changed
-     * @param mainId is the main token type ID
-     * @param tokenURI is NEW IPFS URI for metadata of the token
-     * Users get various tokens proportionally to the amount invested.
-     * @return bool
-     */
-    function setMainTokenURI(
-        uint256 mainId,
-        string calldata tokenURI
-    ) public returns (bool) {}
-
-    /**
-     * @param mainId is the main token type ID
-     * @param subId is the token subtype ID which metadata changes
-     * @param tokenURI is NEW IPFS URI for metadata of the token
-     * @return boolean
-     */
-    function setSubTokenURI(
-        uint256 mainId,
-        uint256 subId,
-        string calldata tokenURI
-    ) public returns (bool) {}
-
     function mintWithTokenURI(
         address recipient,
         uint256 mainId,
-        uint256 subId,
-        uint256 amounts,
-        string calldata tokenURI
-    ) public virtual returns (bool) {
-        require(owner == msg.sender, "DLT : onlyOwner can mint new tokens.");
+        uint256 subIdAmounts,
+        uint256 tokenAmounts,
+        uint256 shipValue,
+        string[] calldata tokenURIs
+    ) public virtual onlyOwner returns (bool) {
         require(recipient != address(0), "DLT : mint to the zero address");
+        require(
+            subIdAmounts == tokenURIs.length,
+            "DLT : tokenURIs length mismatch with subIdAmounts."
+        );
 
-        // 1. mint전에 미리 체크, mainId, subId 겹치지 않는지
-        _balances[mainId][recipient][subId] += amounts;
-        // 2. 이게 맞냐? 이러면 똑같은 토큰 발급하는데 매번 반복해야돼? 맨 처음에 하면 되잖아.
-        // _tokenURI[mainId][subId] = tokenURI;
-
+        _totalSupply[mainId] = tokenAmounts;
+        for (uint256 i = 0; i < subIdAmounts; i++) {
+            _tokenURI[mainId][i] = tokenURIs[i];
+            _balances[mainId][recipient][i] = tokenAmounts;
+            _tokenCount[mainId] = subIdAmounts;
+            _approve(owner, address(this), mainId, i, tokenAmounts);
+        }
+        _setApprovalForAll(owner, address(this), true);
+        _shipValue[mainId] = shipValue;
+        shipCounts += 1;
         return true;
+    }
+
+    function invest(
+        uint256 amount,
+        uint256 mainId
+    ) public payable returns (uint256) {
+        require(amount > 0, "DLT : Investing Amount must be greater than zero");
+        require(shipCounts > mainId, "DLT : RWA is not minted yet");
+
+        address investor = msg.sender;
+
+        // ERC-20 토큰을 owner에게 전송
+
+        // 먼저 approve로 허락 받고
+        //require(stablecoin.Approval(investor, address(this), amount), "Stable Coin : Transfer failed");
+        require(
+            stablecoin.transferFrom(investor, owner, amount),
+            "Stable Coin : Transfer failed"
+        );
+
+        // 그만큼 subId 토큰 전송
+        uint256 shipValue = _shipValue[mainId];
+        uint256 totalSupply = _totalSupply[mainId];
+        uint256 pricePerToken = shipValue / totalSupply;
+        uint256 tokenAmountToUser = amount / pricePerToken;
+
+        _setApprovalForAll(owner, address(this), true);
+
+        // 해당 금액만큼 user에게 approve 후 transferfrom
+        for (uint256 i = 0; i < _tokenCount[mainId]; i++) {
+            _approve(owner, investor, mainId, i, tokenAmountToUser);
+
+            safeTransferFrom(owner, investor, mainId, i, tokenAmountToUser);
+        }
+
+        return tokenAmountToUser;
     }
 
     function safeTransferFrom(
@@ -213,6 +243,8 @@ contract DLT is IDLT, IDLTMetadataMintable {
         return true;
     }
 
+    // View/Pure Functions
+
     function subBalanceOf(
         address account,
         uint256 mainId,
@@ -250,12 +282,22 @@ contract DLT is IDLT, IDLTMetadataMintable {
         return _allowance(owner, spender, mainId, subId);
     }
 
+    // Function to return the token URI for a given mainId and subId
+    function tokenURI(
+        uint256 mainId,
+        uint256 subId
+    ) public view returns (string memory) {
+        return _tokenURI[mainId][subId];
+    }
+
     function isApprovedForAll(
         address owner,
         address operator
     ) public view virtual override returns (bool) {
         return _operatorApprovals[owner][operator];
     }
+
+    // Internal Functions
 
     function _safeMint(
         address recipient,
@@ -309,10 +351,13 @@ contract DLT is IDLT, IDLTMetadataMintable {
         bytes memory data
     ) internal virtual {
         address spender = msg.sender;
+        //require(owner == address(0), "DLT : approve from the zero address 00000000000");
 
         if (!_isApprovedOrOwner(sender, spender)) {
+            //require(owner == address(0), "DLT : approve from the zero address 1111111111111");
             _spendAllowance(sender, spender, mainId, subId, amount);
         }
+        //require(owner == address(0), "DLT : approve from the zero address 22222222222222");
 
         _safeTransfer(sender, recipient, mainId, subId, amount, data);
     }
@@ -418,8 +463,13 @@ contract DLT is IDLT, IDLTMetadataMintable {
     ) internal virtual {
         require(owner != address(0), "DLT : approve from the zero address");
         require(spender != address(0), "DLT : approve from the zero address");
+        require(
+            _balances[mainId][owner][subId] > 0,
+            "DLT : You don't own any tokens."
+        );
+        // require(owner == address(0), "DLT : approve from the zero address 4444444444444444");
 
-        _allowances[owner][spender][mainId][subId] = amount;
+        _allowances[owner][spender][mainId][subId] += amount;
         emit Approval(owner, spender, mainId, subId, amount);
     }
 
@@ -443,7 +493,7 @@ contract DLT is IDLT, IDLTMetadataMintable {
         require(sender != address(0), "DLT : transfer from the zero address");
         require(recipient != address(0), "DLT : transfer to the zero address");
 
-        _beforeTokenTransfer(sender, recipient, mainId, subId, amount, "");
+        //_beforeTokenTransfer(sender, recipient, mainId, subId, amount, "");
 
         require(
             _balances[mainId][sender][subId] >= amount,
@@ -457,7 +507,7 @@ contract DLT is IDLT, IDLTMetadataMintable {
 
         emit Transfer(sender, recipient, mainId, subId, amount);
 
-        _afterTokenTransfer(sender, recipient, mainId, subId, amount, "");
+        //_afterTokenTransfer(sender, recipient, mainId, subId, amount, "");
     }
 
     function _mint(
@@ -535,6 +585,7 @@ contract DLT is IDLT, IDLTMetadataMintable {
         return (sender == spender || isApprovedForAll(sender, spender));
     }
 
+    // Private Functions
     function _checkOnDLTReceived(
         address sender,
         address recipient,

@@ -2,11 +2,11 @@
 
 pragma solidity ^0.8.20;
 
-import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
-import "./IGovernanceToken.sol";
+import {AggregatorV3Interface} from "@chainlink/contracts@1.1.0/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
+import "@openzeppelin/contracts@5.0.2/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts@5.0.2/access/Ownable.sol";
+import "@openzeppelin/contracts@5.0.2/token/ERC20/extensions/ERC20Permit.sol";
+import "contracts/IGovernanceToken.sol";
 
 /**
  * @title  Crypto-Collateralized(i.e. eth) Stablecoin contract
@@ -30,10 +30,10 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
     uint256 public liqudateFeePercent;
 
     /// Mappings
-    mapping(address => uint256) ethLiquidationPrice;
-    mapping(address => uint256) userCollateralWei;
-    mapping(address => uint256) mintedStablecoins;
-    mapping(address => uint256) mintedGovernanceToken;
+    mapping(address => uint256) public ethLiquidationPrice;
+    mapping(address => uint256) public userCollateralWei;
+    mapping(address => uint256) public mintedStablecoins;
+    mapping(address => uint256) public mintedGovernanceToken;
 
     /// Addresses
     address public rmaAdmin;
@@ -140,10 +140,10 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
         uint256 weiAmount = msg.value;
 
         /// Get latest ETH/USD price using chainlink datafeed.
-        //uint256 latestETHUSD = uint256(getLatestETHUSD());
+        uint256 latestETHUSD = uint256(getLatestETHUSD());
 
         /// Update `ETHUSD`
-        //ETHUSD = latestETHUSD;
+        ETHUSD = latestETHUSD;
 
         /// Truncate the decimals
         uint256 truncateETHUSD = truncateETHUSDDecimals(ETHUSD);
@@ -395,11 +395,12 @@ contract RMAStablecoin is ERC20, Ownable, ERC20Permit {
     function getLatestETHUSD() public view returns (int) {
         (
             ,
-            /* uint80 roundID */ int answer /*uint startedAt*/ /*uint timeStamp*/ /*uint80 answeredInRound*/,
+            /* uint80 roundID */ int answer,
             ,
             ,
 
-        ) = dataFeed.latestRoundData();
+        ) = /*uint startedAt*/ /*uint timeStamp*/ /*uint80 answeredInRound*/
+            dataFeed.latestRoundData();
 
         return answer;
     }
